@@ -1,0 +1,8 @@
+# Downloaded or generated data: large, rebuildable, and not ours to republish
+hercules/
+rathena/
+pages/
+index/
+# Local working notes
+notes/
+__pycache__/
