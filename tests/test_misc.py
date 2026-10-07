@@ -3,7 +3,7 @@ import json, os, subprocess, sys, tempfile, unittest
 from pathlib import Path
 BIN = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin')
 sys.path.insert(0, BIN)
-import compare_item, parse_irowiki_item as irowiki
+import common, compare_item, parse_iteminfo, parse_irowiki_item as irowiki
 
 PAGE = '''<script>var curID = 740;</script>
 <td class="mdTitle" colspan="2">Knife &amp; Fork</td>
@@ -61,6 +61,47 @@ class CompareItemLookups(unittest.TestCase):
             try: hits = compare_item.doc_hits('1201', 'Knife [3]')
             finally: compare_item.common.DOCS = old
         self.assertEqual([(b, n) for b, n, _ in hits], [('a.md', 1)])
+
+def write_meta_files(root, file_variant, file_commit, index_variant=None, index_commit=None):
+    os.makedirs(f'{root}/pages/downloads', exist_ok=True); os.makedirs(f'{root}/index', exist_ok=True)
+    Path(f'{root}/pages/downloads/itemInfo.lua.meta').write_text(f'variant: {file_variant}\ncommit: {file_commit}\nsha256: abc\n')
+    if index_variant: Path(f'{root}/index/iteminfo.meta').write_text(f'variant: {index_variant}\ncommit: {index_commit}\n')
+
+class ClientVariant(unittest.TestCase):
+    def test_read_kv(self):
+        with tempfile.TemporaryDirectory() as t:
+            Path(f'{t}/m').write_text('a: 1\nurl: https://x/y\n\nbad line\n')
+            self.assertEqual(common.read_kv(f'{t}/m'), {'a': '1', 'url': 'https://x/y'})
+            self.assertEqual(common.read_kv(f'{t}/missing'), {})
+
+    def test_label_and_not_stale_when_matching(self):
+        with tempfile.TemporaryDirectory() as t:
+            write_meta_files(t, 'Renewal', 'a' * 40, 'Renewal', 'a' * 40)
+            self.assertEqual(common.client_label(t), 'Renewal @ ' + 'a' * 10)
+            self.assertIsNone(common.client_file_info(t)['stale'])
+
+    def test_stale_when_variant_or_commit_differs(self):
+        with tempfile.TemporaryDirectory() as t:
+            write_meta_files(t, 'Pre-Renewal', 'b' * 40, 'Renewal', 'b' * 40)
+            self.assertIn('built from Renewal', common.client_file_info(t)['stale'])
+            write_meta_files(t, 'Renewal', 'c' * 40, 'Renewal', 'b' * 40)
+            self.assertIn('run bin/parse_iteminfo.py --index', common.client_file_info(t)['stale'])
+
+    def test_unknown_without_meta(self):
+        with tempfile.TemporaryDirectory() as t:
+            self.assertEqual(common.client_label(t), 'unknown variant')
+            self.assertIsNone(common.client_file_info(t)['stale'])
+
+    def test_index_build_records_variant(self):
+        with tempfile.TemporaryDirectory() as t:
+            write_meta_files(t, 'Pre-Renewal', 'd' * 40)
+            lua = Path(f'{t}/pages/downloads/itemInfo.lua'); lua.write_text('tbl = {\n\t[1] = {\n\t\tidentifiedDisplayName = "A",\n\t},\n}\n')
+            old = parse_iteminfo.ROOT, parse_iteminfo.SRC, parse_iteminfo.IDX, parse_iteminfo.META
+            parse_iteminfo.ROOT, parse_iteminfo.SRC, parse_iteminfo.IDX, parse_iteminfo.META = t, str(lua), f'{t}/index/iteminfo.jsonl', f'{t}/index/iteminfo.meta'
+            try: parse_iteminfo.write_meta()
+            finally: parse_iteminfo.ROOT, parse_iteminfo.SRC, parse_iteminfo.IDX, parse_iteminfo.META = old
+            meta = common.read_kv(f'{t}/index/iteminfo.meta')
+            self.assertEqual((meta['variant'], meta['commit']), ('Pre-Renewal', 'd' * 40)); self.assertIn('built', meta)
 
 class ShellScripts(unittest.TestCase):
     def test_save_page_file_mode_is_byte_exact_with_meta(self):

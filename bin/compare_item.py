@@ -100,7 +100,9 @@ if __name__ == '__main__':
     ir = from_irowiki(iid) if iid else None
     srcs['irowiki'] = norm(ir[0], emulator=False) if ir else None
     cl = from_client(iid)
-    srcs['client (lua)'] = norm(cl[0], emulator=False) if cl else None
+    info = common.client_file_info(ROOT)
+    srcs[f'client ({common.client_label(ROOT)})'] = norm(cl[0], emulator=False) if cl else None
+    if info['stale']: print(f'warning: {info["stale"]}', file=sys.stderr)
     print(f'Item {key} (id {iid})\n')
     w = max(len(k) for k in srcs)
     print(f'{"":{w}}  ' + '  '.join(f'{f:<10}' for f in FIELDS))
@@ -115,7 +117,7 @@ if __name__ == '__main__':
     if not diff: print('  none')
     if ir and ir[1]: print(f'\nirowiki description: {ir[1]}')
     if cl:
-        print('\nClient description (ROenglishRE iteminfo):')
+        print(f'\nClient description (ROenglishRE iteminfo, {common.client_label(ROOT)}):')
         for l in cl[1]: print('   ', l)
     name = next((v['Name'] for v in found.values() if v.get('Name')), None)
     note = common.docs_missing_note()

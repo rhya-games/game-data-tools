@@ -7,7 +7,9 @@
 ClassNum is the view/sprite ID, the same number space as the ai4rei headgear list.
 The file mixes servers: the `server` field says which one wrote the entry (server codes such as iRO, jRO). Missing means unknown.
 """
-import json, os, re, sys
+import datetime, json, os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import common
 from pathlib import Path
 ROOT = os.environ.get('GAME_DATA', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC = f'{ROOT}/pages/downloads/itemInfo.lua'
@@ -36,6 +38,20 @@ def entries():
                'description_raw': lines, 'slots': int(g('slotCount') or 0), 'view': int(g('ClassNum') or 0),
                'costume': g('costume') == 'true', 'server': srv.group(1) if srv else None}
 
+META = f'{ROOT}/index/iteminfo.meta'
+
+def write_meta():
+    """Record which download the index was built from (variant and commit come from fetch_iteminfo.sh's sidecar)."""
+    f = common.read_kv(f'{SRC}.meta')
+    lines = [f'{k}: {f.get(k, "unknown")}' for k in ('variant', 'commit', 'sha256')] + [f'built: {datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}']
+    Path(META).write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+def banner():
+    """One line saying which client file the results come from, plus a warning if the index is out of date."""
+    info = common.client_file_info(ROOT)
+    print(f'[client item file: {common.client_label(ROOT)}]')
+    if info['stale']: print(f'[warning: {info["stale"]}]', file=sys.stderr)
+
 def show(r):
     print(f"{r['id']}  {r['name']}  [slots {r['slots']}, view {r['view']}{', costume' if r['costume'] else ''}, server {r['server'] or 'unknown'}]")
     for l in r['description']: print('   ', l)
@@ -60,17 +76,21 @@ if __name__ == '__main__':
             for r in entries(): f.write(json.dumps(r, ensure_ascii=False) + '\n'); n += 1
         if n == 0: os.remove(tmp); die(f'no items parsed from {SRC}. The file format may have changed.')
         os.replace(tmp, IDX)
-        print(n, 'items ->', IDX)
+        write_meta()
+        print(n, 'items ->', IDX, f'({common.client_label(ROOT)})')
     elif a == ['--check-herc']:
-        hv = herc_views(); ii = {r['id']: r for r in load_index()}
+        banner(); hv = herc_views(); ii = {r['id']: r for r in load_index()}
+        print('(Hercules pre-re ViewSprite is compared; a Renewal client file legitimately differs for items renewal changed.)')
         bad = [(i, v, ii[i]['view'], ii[i]['name']) for i, v in sorted(hv.items()) if i in ii and ii[i]['view'] != v]
         print(len(hv), 'Hercules items with ViewSprite;', len(bad), 'differ from iteminfo ClassNum')
         for i, v, c, n in bad[:40]: print(f'  {i} {n}: Hercules {v}, iteminfo {c}')
     elif a[:1] == ['--view']:
+        banner()
         for r in load_index():
             if r['view'] == int(a[1]): show(r)
     elif not a: die('usage: parse_iteminfo.py --index | --view N | --check-herc | <id|name>')
     else:
+        banner()
         k = a[0].lower()
         for r in load_index():
             if str(r['id']) == k or k == r['name'].lower(): show(r)

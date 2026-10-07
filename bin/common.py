@@ -7,6 +7,26 @@ DOCS = os.environ.get('DOCS_DIR') or 'docs'
 PRECEDENCE = os.environ.get('PRECEDENCE', 'maintainer screenshot > newest patch note > wiki > Hercules pre-re > Hercules re > rAthena')
 YAML_LOADER = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)  # the C loader needs libyaml; fall back to pure Python
 
+def read_kv(path):
+    """Parse a 'key: value' per line file such as a .meta sidecar; missing file gives {}."""
+    p = Path(path)
+    if not p.is_file(): return {}
+    return {k.strip(): v.strip() for k, sep, v in (l.partition(':') for l in p.read_text(encoding='utf-8').splitlines()) if sep and k.strip()}
+
+def client_file_info(root=None):
+    """What the client item file is and what the index was built from: {'file': {...}, 'index': {...}, 'stale': str or None}."""
+    root = root or ROOT
+    f = read_kv(f'{root}/pages/downloads/itemInfo.lua.meta')
+    i = read_kv(f'{root}/index/iteminfo.meta')
+    stale = None
+    if f and i and (f.get('variant'), f.get('commit')) != (i.get('variant'), i.get('commit')):
+        stale = f"the item file is now {f.get('variant', '?')} @ {f.get('commit', '?')[:10]} but the index was built from {i.get('variant', '?')} @ {i.get('commit', '?')[:10]}: run bin/parse_iteminfo.py --index"
+    return {'file': f, 'index': i, 'stale': stale}
+
+def client_label(root=None):
+    i = client_file_info(root)['index']
+    return f"{i.get('variant', 'unknown variant')} @ {i['commit'][:10]}" if i.get('commit') else i.get('variant', 'unknown variant')
+
 def docs_missing_note():
     if os.path.isdir(DOCS): return None
     return f'No docs folder at {os.path.abspath(DOCS)}: doc and patch note mentions are skipped. Run from the repo you are documenting or set DOCS_DIR.'
