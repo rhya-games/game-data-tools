@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""Build a collection of item icons named item<ID>.gif from the image folders of your projects.
+  build_item_images.py --source ~/Projects/uaro-docs/docs/img [--source DIR ...] [--out DIR] [--wanted LIST.csv] [--dry-run]
+Looks for files named <id>.gif / <id>.png (also <id>_1.png and files in sub-folders). When one item has several, it picks the
+icon-sized one (24x24) first, then .gif over .png, then the top-level file over a sub-folder copy. GIFs are copied byte for byte;
+PNGs are converted to GIF with their transparency. Anything that is not 24x24 goes to item-art/ or mobs/ instead of items/.
+Output (default <data folder>/images/):
+  items/item<ID>.gif     24x24 item icons
+  item-art/item<ID>.gif  larger item pictures (not icons)
+  mobs/mob<ID>.gif       monster pictures: a non-icon image whose ID is a monster in the rAthena database (needs --mob-db)
+  each folder has manifest.csv saying which file each image came from. Items and monsters share IDs, hence the prefixes.
+--wanted takes a CSV with an item_id column (for example notes/item-images.csv) and reports which of those items still have no image.
+Mobs can share an ID with an item, so mob images go in their own folder as mob<ID>.gif."""
+import argparse, csv, os, re, shutil, sys
+from pathlib import Path
+ROOT = os.environ.get('GAME_DATA', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+NAME = re.compile(r'(\d{3,7})([_-]\d+)?\.(gif|png)', re.I)
+ICON = (24, 24)
+
+def die(msg): sys.exit(f'error: {msg}')
+
+def candidates(source):
+    """{item id: [candidate dicts]} for every <id>.gif/.png under source."""
+    from PIL import Image
+    out = {}
+    for dp, _, fn in os.walk(source):
+        for f in sorted(fn):
+            m = NAME.fullmatch(f)
+            if not m: continue
+            p = Path(dp) / f
+            try:
+                with Image.open(p) as im: size, frames = im.size, getattr(im, 'n_frames', 1)
+            except Exception: continue   # unreadable image: skip
+            depth = len(p.relative_to(source).parts) - 1
+            out.setdefault(int(m.group(1)), []).append({'path': p, 'ext': m.group(3).lower(), 'suffix': bool(m.group(2)), 'depth': depth, 'size': size, 'frames': frames})
+    return out
+
+def rank(c): return (c['size'] != ICON, c['ext'] != 'gif', c['suffix'], c['depth'], str(c['path']))
+
+def choose(cands): return min(cands, key=rank)
+
+def png_to_gif(src, dst):
+    """Save a PNG as a GIF keeping transparent pixels transparent. Returns True if colours had to be reduced (more than 255)."""
+    from PIL import Image
+    with Image.open(src) as im:
+        rgba = im.convert('RGBA')
+        colors = rgba.getcolors(maxcolors=1 << 20) or []
+        reduced = len({c[:3] for _, c in colors if c[3] >= 128}) > 255
+        alpha = rgba.getchannel('A')
+        pal = rgba.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+        mask = alpha.point(lambda a: 255 if a < 128 else 0)
+        pal.paste(255, mask=mask)           # index 255 = transparent
+        pal.save(dst, format='GIF', transparency=255, optimize=False)
+    return reduced
+
+def mob_ids(path):
+    """Monster IDs from a rAthena mob_db.yml (needed to tell a monster picture from an item picture)."""
+    import yaml
+    if not path or not os.path.isfile(path): return set()
+    loader = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)
+    return {d['Id'] for d in yaml.load(Path(path).read_text(encoding='utf-8'), Loader=loader).get('Body', [])}
+
+def write(c, dst, dry):
+    """Copy a gif or convert a png; returns (note list)."""
+    notes = []
+    if c['ext'] == 'png':
+        notes.append('converted from png')
+        if not dry and png_to_gif(c['path'], dst): notes.append('colours reduced to 255')
+    elif not dry: shutil.copyfile(c['path'], dst)
+    return notes
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--source', action='append', required=True, help='folder to search (repeat)')
+    ap.add_argument('--out', default=f'{ROOT}/images', help='collection root: items/, item-art/ and mobs/ go under it')
+    ap.add_argument('--mob-db', default=f'{ROOT}/rathena/db/pre-re/mob_db.yml', help='rAthena mob_db.yml, to recognise monster pictures')
+    ap.add_argument('--wanted'); ap.add_argument('--dry-run', action='store_true')
+    a = ap.parse_args(argv)
+    try: import PIL  # noqa: F401
+    except ImportError: die('Pillow is required: pip install -r requirements.txt')
+    found = {}
+    for src in a.source:
+        if not os.path.isdir(src): die(f'{src} is not a folder')
+        for i, cs in candidates(Path(src)).items(): found.setdefault(i, []).extend(cs)
+    if not found: die('no <id>.gif or <id>.png images found in the source folders')
+    mobs = mob_ids(a.mob_db)
+    if not mobs: print(f'note: {a.mob_db} not found, so monster pictures cannot be told apart and go to item-art/ (run setup.sh or pass --mob-db)', file=sys.stderr)
+    out = {'items': [], 'item-art': [], 'mobs': []}
+    for i in sorted(found):
+        icons = [c for c in found[i] if c['size'] == ICON]
+        others = [c for c in found[i] if c['size'] != ICON]
+        if icons: out['items'].append((i, choose(icons), 'item'))
+        if others:
+            for kind, pool in (('mobs', others if i in mobs else []), ('item-art', [] if i in mobs else others)):
+                if pool: out[kind].append((i, choose(pool), 'mob' if kind == 'mobs' else 'item'))
+    for kind, entries in out.items():
+        folder = Path(a.out) / kind
+        if not a.dry_run: folder.mkdir(parents=True, exist_ok=True)
+        rows = []
+        for i, c, prefix in entries:
+            dst = folder / f'{prefix}{i}.gif'
+            rows.append([i, dst.name, str(c['path']), f'{c["size"][0]}x{c["size"][1]}', '; '.join(write(c, dst, a.dry_run))])
+        if not a.dry_run:
+            with open(folder / 'manifest.csv', 'w', newline='', encoding='utf-8') as f:
+                w = csv.writer(f); w.writerow(['id', 'file', 'source', 'size', 'notes']); w.writerows(rows)
+        conv = sum('converted' in r[4] for r in rows)
+        print(f'{kind}: {len(rows)} images' + (' (dry run)' if a.dry_run else f' -> {folder}') + f' ({conv} converted from png)')
+    if a.wanted:
+        with open(a.wanted, encoding='utf-8') as f: want = [int(r['item_id']) for r in csv.DictReader(f)]
+        have = {i for i, _, _ in out['items']}
+        missing = [i for i in want if i not in have]
+        print(f'wanted {len(want)} item icons: have {len(want) - len(missing)}, missing {len(missing)}')
+        if not a.dry_run: (Path(a.out) / 'items' / 'missing.txt').write_text('\n'.join(map(str, missing)) + '\n')
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
