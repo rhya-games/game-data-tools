@@ -30,6 +30,11 @@ The compare tools search a `docs/` folder for mentions of the thing you looked u
 
 Set `GAME_DATA` to keep the data somewhere other than this folder.
 
+## Reading the output
+
+- Monster and skill tables compare Hercules against rAthena within each mode (`[re] Exp: ...`). Differences between pre-renewal and renewal are listed on one separate line, because they are expected.
+- A name that is not found prints close names, ignoring case, spaces and punctuation (`Yggdrasilberry` finds `Yggdrasil Berry`).
+
 ## Tests
 
 ```bash

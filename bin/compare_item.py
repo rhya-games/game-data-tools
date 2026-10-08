@@ -4,7 +4,7 @@
 Sources: Hercules pre-re/re, rAthena pre-re/re, saved db.irowiki.org page, client iteminfo (index/iteminfo.jsonl; stats read from its description text), project docs + patch notes.
 Emulator weights are shown divided by 10 (in-game units). Missing Sell = Buy // 2.
 """
-import glob, os, re, sys
+import glob, json, os, re, sys
 from pathlib import Path
 import yaml
 import common
@@ -70,6 +70,21 @@ def from_client(item_id):
             return {'Name': r['name'], 'Weight': g('Weight'), 'Atk': g('Attack'), 'Def': g('Defense'), 'Slots': str(r['slots']) if r['slots'] else None,
                     'Level': g('Required Level')}, r['description']
 
+def item_names():
+    """[(id, name)] from the renewal databases and the client index, for 'did you mean' suggestions."""
+    out = {}
+    for b in herc_blocks(f'{ROOT}/hercules/db/re/item_db.conf'):
+        i, n = herc_get(b, 'Id'), herc_get(b, 'Name')
+        if i and n: out[n] = i
+    for f in sorted(glob.glob(f'{ROOT}/rathena/db/re/item_db_*.yml')):
+        for i, n in re.findall(r'^  - Id: (\d+)\n(?:(?!^  - Id: ).*\n)*?    Name: (.+)$', Path(f).read_text(encoding='utf-8'), re.M):
+            out.setdefault(n.strip().strip('"\''), i)
+    idx = f'{ROOT}/index/iteminfo.jsonl'
+    if os.path.exists(idx):
+        for l in Path(idx).read_text(encoding='utf-8').splitlines():
+            r = json.loads(l); out.setdefault(r['name'], str(r['id']))
+    return [(i, n) for n, i in out.items()]
+
 def doc_hits(item_id, name):
     base = re.sub(r'\s*\[\d\]$', '', name or '')
     idpat = re.compile(rf'(?<!\d){item_id}(?!\d)')
@@ -105,9 +120,10 @@ if __name__ == '__main__':
     if info['stale']: print(f'warning: {info["stale"]}', file=sys.stderr)
     print(f'Item {key} (id {iid})\n')
     w = max(len(k) for k in srcs)
-    print(f'{"":{w}}  ' + '  '.join(f'{f:<10}' for f in FIELDS))
+    cw = common.col_widths(srcs.values(), FIELDS, 10, 28)
+    print(f'{"":{w}}  ' + '  '.join(f'{f:<{cw[f]}}' for f in FIELDS))
     for k, v in srcs.items():
-        print(f'{k:{w}}  ' + ('  '.join(f'{(v.get(f) or "-")[:10]:<10}' for f in FIELDS) if v else '(not found / not saved)'))
+        print(f'{k:{w}}  ' + ('  '.join(f'{(v.get(f) or "-")[:cw[f]]:<{cw[f]}}' for f in FIELDS) if v else '(not found / not saved)'))
     print('\nDisagreements:')
     found = {k: v for k, v in srcs.items() if v}
     diff = False
@@ -115,6 +131,7 @@ if __name__ == '__main__':
         vals = {k: v[f] for k, v in found.items() if v.get(f) not in (None, '')}
         if len({x.lower() for x in vals.values()}) > 1: diff = True; print(f'  {f}: ' + ', '.join(f'{k}={v}' for k, v in vals.items()))
     if not diff: print('  none')
+    if not found and not key.isdigit(): common.print_suggestions(key, item_names())
     if ir and ir[1]: print(f'\nirowiki description: {ir[1]}')
     if cl:
         print(f'\nClient description (ROenglishRE iteminfo, {common.client_label(ROOT)}):')

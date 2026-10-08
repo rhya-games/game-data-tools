@@ -122,6 +122,43 @@ class Common(unittest.TestCase):
         out = buf.getvalue()
         self.assertIn('a.md:1', out); self.assertIn('a.md:3', out); self.assertNotIn('a.md:2', out)
 
+class Readability(unittest.TestCase):
+    def table(self, srcs, fields=('Name', 'Exp', 'Def')):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf): common.print_table(srcs, list(fields))
+        return buf.getvalue()
+
+    def test_modes_are_compared_within_each_mode(self):
+        out = self.table({'herc pre-re': {'Name': 'B', 'Exp': 100, 'Def': 35}, 'herc re': {'Name': 'B', 'Exp': 400, 'Def': 379},
+                          'rath pre-re': {'Name': 'B', 'Exp': 100, 'Def': 35}, 'rath re': {'Name': 'B', 'Exp': 200, 'Def': 379}})
+        self.assertIn('[re] Exp: herc re=400, rath re=200', out)
+        self.assertNotIn('[pre-re]', out)
+        self.assertNotIn('Def:', out.split('Disagreements')[1].split('Differs')[0])  # Def only differs between modes
+        self.assertIn('Differs between pre-re and re (expected): Def', out)
+
+    def test_modes_with_no_source_disagreement(self):
+        out = self.table({'herc pre-re': {'Exp': 1}, 'herc re': {'Exp': 2}, 'rath pre-re': {'Exp': 1}, 'rath re': {'Exp': 2}}, ('Exp',))
+        self.assertIn('same mode):\n  none', out); self.assertIn('expected): Exp', out)
+
+    def test_columns_widen_to_fit_long_names(self):
+        out = self.table({'a': {'Name': 'Battle Manual 100% Extra Long'}}, ('Name',))
+        self.assertIn('Battle Manual 100% Extra Long', out)
+        self.assertEqual(common.col_widths([{'Name': 'x' * 100}], ['Name'], 9), {'Name': 40})
+        self.assertEqual(common.col_widths([{'Name': 'ab'}, None], ['Name', 'Hp'], 9), {'Name': 9, 'Hp': 9})
+
+    def test_suggest_ignores_spacing_case_and_typos(self):
+        names = [(607, 'Yggdrasil Berry'), (12292, 'Unripe Yggdrasilberry'), (616, 'Old Card Album'), (7792, 'Old'), (1, '\ufffd\ufffd junk')]
+        self.assertEqual(common.suggest('Yggdrasilberry', names)[0], (607, 'Yggdrasil Berry'))
+        self.assertIn((616, 'Old Card Album'), common.suggest('old card albm', names))
+        self.assertNotIn((7792, 'Old'), common.suggest('Old Card Albm', names))  # short names do not match by containment
+        self.assertEqual(common.suggest('zzzzzz', names), [])
+        self.assertEqual(common.suggest('ab', names), [])
+
+    def test_print_suggestions(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf): common.print_suggestions('Poringg', [(1002, 'Poring')]); common.print_suggestions('qqqq', [(1, 'Poring')])
+        self.assertEqual(buf.getvalue().count('Close names'), 1); self.assertIn('Poring (1002)', buf.getvalue())
+
 class CompareItem(unittest.TestCase):
     def test_from_herc_by_id_and_name(self):
         with tempfile.TemporaryDirectory() as t:

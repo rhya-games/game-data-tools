@@ -64,19 +64,69 @@ def herc_parse(block):
 def strip_prefix(s):
     return re.sub(r'^(Ele_|RC_|Size_|RC2_)', '', str(s)) if s is not None else None
 
-def print_table(srcs, fields, width=11):
-    w = max(len(k) for k in srcs)
-    print(f'{"":{w}}  ' + '  '.join(f'{f:<{width}}' for f in fields))
-    for k, v in srcs.items():
-        print(f'{k:{w}}  ' + ('  '.join(f'{str(v.get(f) if v.get(f) is not None else "-")[:width]:<{width}}' for f in fields) if v else '(not found)'))
-    print('\nDisagreements:')
-    found = {k: v for k, v in srcs.items() if v}
-    diff = False
+def col_widths(rows, fields, min_width=9, cap=40):
+    """Width per column: at least min_width, wide enough for the longest value, never more than cap."""
+    return {f: min(cap, max(min_width, len(f), *(len(str(r.get(f) if r.get(f) is not None else '-')) for r in rows if r))) for f in fields}
+
+_MODE = re.compile(r'^(\S+) (pre-re|re)$')
+
+def _differing(found, fields):
+    out = {}
     for f in fields:
         vals = {k: str(v[f]) for k, v in found.items() if v.get(f) not in (None, '')}
-        if len({x.lower() for x in vals.values()}) > 1:
-            diff = True; print(f'  {f}: ' + ', '.join(f'{k}={x}' for k, x in vals.items()))
-    if not diff: print('  none')
+        if len({x.lower() for x in vals.values()}) > 1: out[f] = vals
+    return out
+
+def print_table(srcs, fields, width=11):
+    """Side-by-side table. Sources named '<tool> pre-re' / '<tool> re' are compared tool against tool within each mode;
+    differences between the modes are listed separately because they are expected."""
+    w = max(len(k) for k in srcs)
+    cw = col_widths(srcs.values(), fields, width)
+    print(f'{"":{w}}  ' + '  '.join(f'{f:<{cw[f]}}' for f in fields))
+    for k, v in srcs.items():
+        print(f'{k:{w}}  ' + ('  '.join(f'{str(v.get(f) if v.get(f) is not None else "-")[:cw[f]]:<{cw[f]}}' for f in fields) if v else '(not found)'))
+    found = {k: v for k, v in srcs.items() if v}
+    modes = {}
+    for k in found:
+        m = _MODE.match(k)
+        modes.setdefault(m.group(2) if m else '', {})[k] = found[k]
+    if '' in modes or len(modes) < 2:
+        print('\nDisagreements:')
+        d = _differing(found, fields)
+        for f, vals in d.items(): print(f'  {f}: ' + ', '.join(f'{k}={x}' for k, x in vals.items()))
+        if not d: print('  none')
+        return
+    print('\nDisagreements between sources (same mode):')
+    any_diff = False
+    for mode, grp in modes.items():
+        for f, vals in _differing(grp, fields).items():
+            any_diff = True; print(f'  [{mode}] {f}: ' + ', '.join(f'{k}={x}' for k, x in vals.items()))
+    if not any_diff: print('  none')
+    # fields that differ between modes, ignoring the ones already reported inside a mode
+    agree = lambda grp, f: len({str(v[f]).lower() for v in grp.values() if v.get(f) not in (None, '')}) == 1
+    names = [f for f in fields if all(agree(g, f) for g in modes.values())
+             and len({str(next(v[f] for v in g.values() if v.get(f) not in (None, ''))).lower() for g in modes.values()}) > 1]
+    if names: print('\nDiffers between pre-re and re (expected): ' + ', '.join(names))
+
+def _squash(s): return re.sub(r'[^a-z0-9]', '', str(s).lower())
+
+def suggest(key, names, n=5):
+    """Near matches for a name that was not found: ignores case, spaces and punctuation ('Yggdrasilberry' finds 'Yggdrasil Berry'). names: [(id, name)]"""
+    import difflib
+    k = _squash(key)
+    if len(k) < 3: return []
+    seen, hits = set(), []
+    pool = [(i, nm, _squash(nm)) for i, nm in names if nm and '\ufffd' not in nm and _squash(nm)]
+    for i, nm, sq in pool:
+        if (k in sq or (sq in k and len(sq) >= max(4, len(k) * 0.6))) and nm not in seen: seen.add(nm); hits.append((i, nm))
+    for sq in difflib.get_close_matches(k, [p[2] for p in pool], n=n, cutoff=0.75):
+        for i, nm, s2 in pool:
+            if s2 == sq and nm not in seen: seen.add(nm); hits.append((i, nm))
+    return hits[:n]
+
+def print_suggestions(key, names):
+    hits = suggest(key, names)
+    if hits: print(f'\nNo exact match for {key!r}. Close names: ' + ', '.join(f'{nm} ({i})' for i, nm in hits))
 
 def doc_hits(names, id_pat=None, limit=25):
     """Lines in docs/ and patch notes naming the thing. A name inside a longer capitalised name ("Poring Card") is skipped."""

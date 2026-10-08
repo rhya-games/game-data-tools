@@ -38,7 +38,9 @@ if __name__ == '__main__':
     key = sys.argv[1]
     data = {'herc pre-re': herc('pre-re'), 'herc re': herc('re'), 'rath pre-re': rath('pre-re'), 'rath re': rath('re')}
     ids = sorted({i for d in data.values() for i, v in d.items() if str(i) == key or (v['Name'] or '').lower() == key.lower()})
-    if not ids: sys.exit(f'No monster matches {key!r} in any source.')
+    if not ids:
+        names = {(i, v['Name']) for d in data.values() for i, v in d.items() if v.get('Name')}
+        print_suggestions(key, sorted(names, key=str)); sys.exit(f'No monster matches {key!r} in any source.')
     for i in ids[:6]:
         print(f'\n===== Monster {i} =====')
         print_table({k: d.get(i) for k, d in data.items()}, FIELDS, 9)
