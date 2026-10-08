@@ -14,15 +14,12 @@ def png(path, size=(24, 24), color=(30, 30, 200, 255), hole=None):
     if hole: im.putpixel(hole, (0, 0, 0, 0))
     im.save(path, 'PNG')
 
-MOBS = 'Body:\n  - Id: 1002\n    Name: Poring\n  - Id: 1005\n    Name: Familiar\n'
-
 class BuildTests(unittest.TestCase):
     def setUp(self): self.tmp = tempfile.TemporaryDirectory(); self.t = self.tmp.name
     def tearDown(self): self.tmp.cleanup()
-    def run_build(self, *extra, mobs=MOBS):
-        db = f'{self.t}/mob_db.yml'; Path(db).write_text(mobs)
+    def run_build(self, *extra):
         buf = io.StringIO()
-        with contextlib.redirect_stdout(buf): b.main(['--source', f'{self.t}/src', '--out', f'{self.t}/out', '--mob-db', db, *extra])
+        with contextlib.redirect_stdout(buf): b.main(['--source', f'{self.t}/src', '--out', f'{self.t}/out', *extra])
         return buf.getvalue()
     def manifest(self, kind):
         with open(f'{self.t}/out/{kind}/manifest.csv', encoding='utf-8') as f: return {int(r['id']): r for r in csv.DictReader(f)}
@@ -46,21 +43,12 @@ class BuildTests(unittest.TestCase):
         gif(f'{self.t}/src2/701.gif', size=(40, 40)); png(f'{self.t}/src2/701.png')    # icon-sized beats a bigger gif
         c = b.candidates(Path(f'{self.t}/src2'))[701]; self.assertEqual(b.choose(c)['ext'], 'png')
 
-    def test_monster_pictures_and_item_art_are_separated_by_id(self):
-        gif(f'{self.t}/src/1005.gif', size=(56, 40))            # a monster id, not icon-sized -> mobs
-        gif(f'{self.t}/src/2476.gif', size=(237, 188))          # not a monster -> item-art
-        gif(f'{self.t}/src/1002.gif')                           # a monster id that is also an item icon -> items
+    def test_non_icon_images_are_monster_pictures(self):
+        gif(f'{self.t}/src/1005.gif', size=(56, 40)); gif(f'{self.t}/src/2476.gif', size=(237, 188))
+        gif(f'{self.t}/src/1002.gif'); gif(f'{self.t}/src/Mobs/1002.gif', size=(30, 30))   # an id used by an item icon and a monster picture
         out = self.run_build()
-        self.assertTrue(os.path.exists(f'{self.t}/out/mobs/mob1005.gif')); self.assertTrue(os.path.exists(f'{self.t}/out/item-art/item2476.gif'))
-        self.assertTrue(os.path.exists(f'{self.t}/out/items/item1002.gif')); self.assertFalse(os.path.exists(f'{self.t}/out/items/item1005.gif'))
-        self.assertIn('mobs: 1 images', out)
-
-    def test_without_a_mob_db_everything_non_icon_is_item_art(self):
-        gif(f'{self.t}/src/1005.gif', size=(56, 40))
-        err = io.StringIO()
-        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
-            b.main(['--source', f'{self.t}/src', '--out', f'{self.t}/out', '--mob-db', f'{self.t}/none.yml'])
-        self.assertTrue(os.path.exists(f'{self.t}/out/item-art/item1005.gif')); self.assertIn('not found', err.getvalue())
+        for n in ('mobs/mob1005.gif', 'mobs/mob2476.gif', 'mobs/mob1002.gif', 'items/item1002.gif'): self.assertTrue(os.path.exists(f'{self.t}/out/{n}'), n)
+        self.assertFalse(os.path.exists(f'{self.t}/out/items/item1005.gif')); self.assertIn('mobs: 3 images', out)
 
     def test_wanted_reports_missing(self):
         gif(f'{self.t}/src/501.gif')

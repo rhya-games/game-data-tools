@@ -3,11 +3,10 @@
   build_item_images.py --source ~/Projects/uaro-docs/docs/img [--source DIR ...] [--out DIR] [--wanted LIST.csv] [--dry-run]
 Looks for files named <id>.gif / <id>.png (also <id>_1.png and files in sub-folders). When one item has several, it picks the
 icon-sized one (24x24) first, then .gif over .png, then the top-level file over a sub-folder copy. GIFs are copied byte for byte;
-PNGs are converted to GIF with their transparency. Anything that is not 24x24 goes to item-art/ or mobs/ instead of items/.
+PNGs are converted to GIF with their transparency. Anything that is not 24x24 goes to mobs/ (a monster picture), not items/.
 Output (default <data folder>/images/):
   items/item<ID>.gif     24x24 item icons
-  item-art/item<ID>.gif  larger item pictures (not icons)
-  mobs/mob<ID>.gif       monster pictures: a non-icon image whose ID is a monster in the rAthena database (needs --mob-db)
+  mobs/mob<ID>.gif       every other image: in the wiki's image folders anything that is not icon-sized is a monster picture
   each folder has manifest.csv saying which file each image came from. Items and monsters share IDs, hence the prefixes.
 --wanted takes a CSV with an item_id column (for example notes/item-images.csv) and reports which of those items still have no image.
 Mobs can share an ID with an item, so mob images go in their own folder as mob<ID>.gif."""
@@ -53,13 +52,6 @@ def png_to_gif(src, dst):
         pal.save(dst, format='GIF', transparency=255, optimize=False)
     return reduced
 
-def mob_ids(path):
-    """Monster IDs from a rAthena mob_db.yml (needed to tell a monster picture from an item picture)."""
-    import yaml
-    if not path or not os.path.isfile(path): return set()
-    loader = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)
-    return {d['Id'] for d in yaml.load(Path(path).read_text(encoding='utf-8'), Loader=loader).get('Body', [])}
-
 def write(c, dst, dry):
     """Copy a gif or convert a png; returns (note list)."""
     notes = []
@@ -72,8 +64,7 @@ def write(c, dst, dry):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--source', action='append', required=True, help='folder to search (repeat)')
-    ap.add_argument('--out', default=f'{ROOT}/images', help='collection root: items/, item-art/ and mobs/ go under it')
-    ap.add_argument('--mob-db', default=f'{ROOT}/rathena/db/pre-re/mob_db.yml', help='rAthena mob_db.yml, to recognise monster pictures')
+    ap.add_argument('--out', default=f'{ROOT}/images', help='collection root: items/ and mobs/ go under it')
     ap.add_argument('--wanted'); ap.add_argument('--dry-run', action='store_true')
     a = ap.parse_args(argv)
     try: import PIL  # noqa: F401
@@ -83,16 +74,12 @@ def main(argv=None):
         if not os.path.isdir(src): die(f'{src} is not a folder')
         for i, cs in candidates(Path(src)).items(): found.setdefault(i, []).extend(cs)
     if not found: die('no <id>.gif or <id>.png images found in the source folders')
-    mobs = mob_ids(a.mob_db)
-    if not mobs: print(f'note: {a.mob_db} not found, so monster pictures cannot be told apart and go to item-art/ (run setup.sh or pass --mob-db)', file=sys.stderr)
-    out = {'items': [], 'item-art': [], 'mobs': []}
+    out = {'items': [], 'mobs': []}
     for i in sorted(found):
         icons = [c for c in found[i] if c['size'] == ICON]
         others = [c for c in found[i] if c['size'] != ICON]
         if icons: out['items'].append((i, choose(icons), 'item'))
-        if others:
-            for kind, pool in (('mobs', others if i in mobs else []), ('item-art', [] if i in mobs else others)):
-                if pool: out[kind].append((i, choose(pool), 'mob' if kind == 'mobs' else 'item'))
+        if others: out['mobs'].append((i, choose(others), 'mob'))
     for kind, entries in out.items():
         folder = Path(a.out) / kind
         if not a.dry_run: folder.mkdir(parents=True, exist_ok=True)
