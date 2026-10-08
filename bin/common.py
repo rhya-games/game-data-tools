@@ -128,23 +128,30 @@ def print_suggestions(key, names):
     hits = suggest(key, names)
     if hits: print(f'\nNo exact match for {key!r}. Close names: ' + ', '.join(f'{nm} ({i})' for i, nm in hits))
 
-def doc_hits(names, id_pat=None, limit=25):
-    """Lines in docs/ and patch notes naming the thing. A name inside a longer capitalised name ("Poring Card") is skipped."""
-    def hit(l):
-        if id_pat and id_pat.search(l): return True
+def find_doc_hits(names, id_pat=None):
+    """[(file, line, text)] for doc lines naming the thing, lines containing its ID first, then name-only lines.
+    A name inside a longer capitalised name ("Poring Card") is skipped, and so is a numbered variant ("Field Manual 100%")."""
+    def strong(l): return bool(id_pat and id_pat.search(l))
+    def named(l):
         for base in names:
             for m in re.finditer(rf'(?<![A-Za-z]){re.escape(base)}(?![A-Za-z])', l):
                 prev = re.search(r"([A-Za-z']+) $", l[:m.start()]); nxt = re.match(r" ([A-Za-z']+)", l[m.end():])
+                if re.match(r'\s+\d+\s*%', l[m.end():]): continue
                 if not (prev and prev.group(1)[0].isupper()) and not (nxt and nxt.group(1)[0].isupper()): return True
         return False
-    out = []
-    note = docs_missing_note()
-    if note: print('\n' + note); return
+    ids, only_names = [], []
     for f in sorted(glob.glob(f'{DOCS}/**/*.md', recursive=True)):
         b = os.path.relpath(f, DOCS)
         if b.startswith(('all-patch-notes', 'dev/')) or re.search(r'patch-notes/\d{4}/index', b): continue
         for n, l in enumerate(Path(f).read_text(encoding='utf-8', errors='replace').splitlines(), 1):
-            if hit(l): out.append((b, n, l.strip()[:200]))
+            if strong(l): ids.append((b, n, l.strip()[:200]))
+            elif named(l): only_names.append((b, n, l.strip()[:200]))
+    return ids + only_names
+
+def doc_hits(names, id_pat=None, limit=25):
+    note = docs_missing_note()
+    if note: print('\n' + note); return
+    out = find_doc_hits(names, id_pat)
     print(f'\nproject docs / patch notes ({len(out)} lines mention it):')
     for b, n, l in out[:limit]: print(f'  {b}:{n}: {l}')
     if len(out) > limit: print(f'  ... {len(out) - limit} more')

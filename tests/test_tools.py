@@ -159,6 +159,28 @@ class Readability(unittest.TestCase):
         with contextlib.redirect_stdout(buf): common.print_suggestions('Poringg', [(1002, 'Poring')]); common.print_suggestions('qqqq', [(1, 'Poring')])
         self.assertEqual(buf.getvalue().count('Close names'), 1); self.assertIn('Poring (1002)', buf.getvalue())
 
+class DocHits(unittest.TestCase):
+    def hits(self, files, names, id_pat=None):
+        with tempfile.TemporaryDirectory() as t:
+            for name, text in files.items(): tmp_file(t, name, text)
+            old, common.DOCS = common.DOCS, t
+            try: return common.find_doc_hits(names, id_pat)
+            finally: common.DOCS = old
+
+    def test_numbered_variant_is_not_a_mention(self):
+        h = self.hits({'a.md': 'Field Manual 100% sells\nField Manual is common\nField Manual, Battle Manual\n'}, ['Field Manual'])
+        self.assertEqual([n for _, n, _ in h], [2, 3])
+
+    def test_lines_with_the_id_come_first(self):
+        import re
+        h = self.hits({'a.md': 'Knife here\nsee `1201`\n', 'b.md': 'id 1201 too\n'}, ['Knife'], re.compile(r'1201'))
+        self.assertEqual([(b, n) for b, n, _ in h], [('a.md', 2), ('b.md', 1), ('a.md', 1)])
+
+    def test_id_match_beats_the_variant_rule(self):
+        import re
+        h = self.hits({'a.md': 'Field Manual 100% (`14533`)\n'}, ['Field Manual'], re.compile(r'14533'))
+        self.assertEqual(len(h), 1)
+
 class CompareItem(unittest.TestCase):
     def test_from_herc_by_id_and_name(self):
         with tempfile.TemporaryDirectory() as t:

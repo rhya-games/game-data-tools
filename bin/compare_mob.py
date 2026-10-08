@@ -11,6 +11,7 @@ import yaml
 from common import *
 FIELDS = ['Name', 'Level', 'Hp', 'Exp', 'JExp', 'Atk', 'Def', 'Mdef', 'Str', 'Agi', 'Vit', 'Int', 'Dex', 'Luk', 'Size', 'Race', 'Element', 'Speed']
 
+# Fields a database leaves out take that project's documented default (they differ: stats 0 vs 1, size Medium vs Small).
 def herc(mode):
     out = {}
     for b in herc_blocks(f'{ROOT}/hercules/db/{mode}/mob_db.conf'):
@@ -19,19 +20,19 @@ def herc(mode):
         st = d.get('Stats', {})
         atk = re.findall(r'\d+', str(d.get('Attack', '')))
         el = re.findall(r'"?(\w+)"?', str(d.get('Element', '')).replace('Ele_', ''))
-        out[d['Id']] = {'Name': d.get('Name'), 'Level': d.get('Lv'), 'Hp': d.get('Hp'), 'Exp': d.get('Exp'), 'JExp': d.get('JExp'),
-            'Atk': ('-' if mode == 'pre-re' else '/').join(atk) if atk else None, 'Def': d.get('Def', 0), 'Mdef': d.get('Mdef', 0), **{k: st.get(k) for k in ('Str', 'Agi', 'Vit', 'Int', 'Dex', 'Luk')},
-            'Size': strip_prefix(d.get('Size')), 'Race': strip_prefix(d.get('Race')), 'Element': ' '.join(el), 'Speed': d.get('MoveSpeed')}
+        out[d['Id']] = {'Name': d.get('Name'), 'Level': d.get('Lv', 1), 'Hp': d.get('Hp', 1), 'Exp': d.get('Exp', 0), 'JExp': d.get('JExp', 0),
+            'Atk': ('-' if mode == 'pre-re' else '/').join(atk) if atk else None, 'Def': d.get('Def', 0), 'Mdef': d.get('Mdef', 0), **{k: st.get(k, 0) for k in ('Str', 'Agi', 'Vit', 'Int', 'Dex', 'Luk')},
+            'Size': strip_prefix(d.get('Size', 'Size_Medium')), 'Race': strip_prefix(d.get('Race', 'RC_Formless')), 'Element': ' '.join(el), 'Speed': d.get('MoveSpeed')}
     return out
 
 def rath(mode):
     out = {}
     for d in yaml.load(Path(f'{ROOT}/rathena/db/{mode}/mob_db.yml').read_text(encoding='utf-8'), Loader=YAML_LOADER).get('Body', []):
         a, a2 = d.get('Attack'), d.get('Attack2')
-        out[d['Id']] = {'Name': d.get('Name'), 'Level': d.get('Level'), 'Hp': d.get('Hp'), 'Exp': d.get('BaseExp'), 'JExp': d.get('JobExp'),
+        out[d['Id']] = {'Name': d.get('Name'), 'Level': d.get('Level', 1), 'Hp': d.get('Hp', 1), 'Exp': d.get('BaseExp', 0), 'JExp': d.get('JobExp', 0),
             'Atk': f"{a}{'-' if mode == 'pre-re' else '/'}{a2}" if a is not None and a2 is not None else (str(a) if a is not None else None), 'Def': d.get('Defense', 0), 'Mdef': d.get('MagicDefense', 0),
-            **{k: d.get(k) for k in ('Str', 'Agi', 'Vit', 'Int', 'Dex', 'Luk')}, 'Size': d.get('Size'), 'Race': d.get('Race'),
-            'Element': f"{d.get('Element', '')} {d.get('ElementLevel', '')}".strip(), 'Speed': d.get('WalkSpeed')}
+            **{k: d.get(k, 1) for k in ('Str', 'Agi', 'Vit', 'Int', 'Dex', 'Luk')}, 'Size': d.get('Size', 'Small'), 'Race': d.get('Race', 'Formless'),
+            'Element': f"{d.get('Element', 'Neutral')} {d.get('ElementLevel', 1)}".strip(), 'Speed': d.get('WalkSpeed')}
     return out
 
 if __name__ == '__main__':

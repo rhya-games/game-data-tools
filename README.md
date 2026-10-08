@@ -33,6 +33,8 @@ Set `GAME_DATA` to keep the data somewhere other than this folder.
 ## Reading the output
 
 - Monster and skill tables compare Hercules against rAthena within each mode (`[re] Exp: ...`). Differences between pre-renewal and renewal are listed on one separate line, because they are expected.
+- A field a database leaves out takes that project's documented default (rAthena monster stats default to 1, Hercules to 0; size Small vs Medium), so a blank is not mistaken for a difference.
+- In the docs list, lines containing the ID come first, and a numbered variant (`Field Manual 100%`) is not counted as a mention of `Field Manual`.
 - A name that is not found prints close names, ignoring case, spaces and punctuation (`Yggdrasilberry` finds `Yggdrasil Berry`).
 
 ## Tests

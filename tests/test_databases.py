@@ -168,6 +168,26 @@ class MobTests(Fixture):
         self.assertEqual(compare_mob.herc('re')[1002]['Atk'], '7/10')
         self.assertEqual(compare_mob.rath('re')[1002]['Atk'], '7/10')
 
+class MissingFieldDefaults(Fixture):
+    """A field a database leaves out takes that project's documented default, so a blank is not mistaken for a difference."""
+    def test_mob_defaults_differ_by_project(self):
+        put(self.tmp.name, 'hercules/db/pre-re/mob_db.conf', 'm: (\n{\n\tId: 1\n\tName: "Bare"\n}\n)\n')
+        put(self.tmp.name, 'rathena/db/pre-re/mob_db.yml', 'Body:\n  - Id: 1\n    AegisName: BARE\n    Name: Bare\n')
+        h, r = compare_mob.herc('pre-re')[1], compare_mob.rath('pre-re')[1]
+        self.assertEqual((h['Level'], h['Hp'], h['Exp'], h['Str'], h['Size'], h['Race']), (1, 1, 0, 0, 'Medium', 'Formless'))
+        self.assertEqual((r['Level'], r['Hp'], r['Exp'], r['Str'], r['Size'], r['Race'], r['Element']), (1, 1, 0, 1, 'Small', 'Formless', 'Neutral 1'))
+
+    def test_explicit_values_are_not_overridden(self):
+        h, r = compare_mob.herc('pre-re')[1002], compare_mob.rath('pre-re')[1002]
+        self.assertEqual((h['Str'], h['Size'], r['Str'], r['Size']), (6, 'Medium', 6, 'Medium'))
+
+    def test_skill_defaults(self):
+        put(self.tmp.name, 'hercules/db/pre-re/skill_db.conf', 's: (\n{\n\tId: 5\n\tName: "XX_BARE"\n\tMaxLevel: 1\n}\n)\n')
+        put(self.tmp.name, 'rathena/db/pre-re/skill_db.yml', 'Body:\n  - Id: 5\n    Name: XX_BARE\n    Description: Bare\n    MaxLevel: 1\n')
+        h, r = compare_skill.herc('pre-re')[5], compare_skill.rath('pre-re')[5]
+        for row, neutral in ((h, 'Neutral'), (r, 'Neutral')):
+            self.assertEqual((row['Range'], row['CastTime'], row['AfterCast'], row['CoolDown'], row['Element']), ('0', '0', '0', '0', neutral))
+
 class SkillTests(Fixture):
     def test_lv(self):
         lv = compare_skill.lv

@@ -26,18 +26,18 @@ def herc(mode):
         d = herc_parse(b)
         if 'Id' not in d: continue
         req = d.get('Requirements', {})
-        out[d['Id']] = {'Const': d.get('Name'), 'Name': d.get('Description'), 'MaxLevel': d.get('MaxLevel'), 'Range': lv(d.get('Range')),
-            'Element': strip_prefix(lv(d.get('Element'))), 'SP': lv(req.get('SPCost')), 'CastTime': lv(d.get('CastTime')),
-            'AfterCast': lv(d.get('AfterCastActDelay')), 'CoolDown': lv(d.get('CoolDown')), 'Quest': 'yes' if (d['SkillInfo'].get('Quest') if isinstance(d.get('SkillInfo'), dict) else 'Quest' in str(d.get('SkillInfo', ''))) else 'no'}
+        out[d['Id']] = {'Const': d.get('Name'), 'Name': d.get('Description'), 'MaxLevel': d.get('MaxLevel'), 'Range': lv(d.get('Range', 0)),
+            'Element': strip_prefix(lv(d.get('Element', 'Ele_Neutral'))), 'SP': lv(req.get('SPCost')), 'CastTime': lv(d.get('CastTime', 0)),
+            'AfterCast': lv(d.get('AfterCastActDelay', 0)), 'CoolDown': lv(d.get('CoolDown', 0)), 'Quest': 'yes' if (d['SkillInfo'].get('Quest') if isinstance(d.get('SkillInfo'), dict) else 'Quest' in str(d.get('SkillInfo', ''))) else 'no'}
     return out
 
 def rath(mode):
     out = {}
     for d in yaml.load(Path(f'{ROOT}/rathena/db/{mode}/skill_db.yml').read_text(encoding='utf-8'), Loader=YAML_LOADER).get('Body', []):
         req = d.get('Requires', {})
-        out[d['Id']] = {'Const': d.get('Name'), 'Name': d.get('Description'), 'MaxLevel': d.get('MaxLevel'), 'Range': lv(d.get('Range'), 'Size'),
-            'Element': lv(d.get('Element'), 'Element'), 'SP': lv(req.get('SpCost'), 'Amount'), 'CastTime': lv(d.get('CastTime'), 'Time'),
-            'AfterCast': lv(d.get('AfterCastActDelay'), 'Time'), 'CoolDown': lv(d.get('Cooldown') or d.get('CoolDown'), 'Time'), 'Quest': 'yes' if (d['Flags'].get('IsQuest') if isinstance(d.get('Flags'), dict) else False) else 'no'}
+        out[d['Id']] = {'Const': d.get('Name'), 'Name': d.get('Description'), 'MaxLevel': d.get('MaxLevel'), 'Range': lv(d.get('Range', 0), 'Size'),
+            'Element': lv(d.get('Element', 'Neutral'), 'Element'), 'SP': lv(req.get('SpCost'), 'Amount'), 'CastTime': lv(d.get('CastTime', 0), 'Time'),
+            'AfterCast': lv(d.get('AfterCastActDelay', 0), 'Time'), 'CoolDown': lv(d.get('Cooldown') or d.get('CoolDown') or 0, 'Time'), 'Quest': 'yes' if (d['Flags'].get('IsQuest') if isinstance(d.get('Flags'), dict) else False) else 'no'}
     return out
 
 def classes(const):

@@ -87,23 +87,7 @@ def item_names():
 
 def doc_hits(item_id, name):
     base = re.sub(r'\s*\[\d\]$', '', name or '')
-    idpat = re.compile(rf'(?<!\d){item_id}(?!\d)')
-    namepat = re.compile(rf'(?<![A-Za-z]){re.escape(base)}(?![A-Za-z])') if base else None
-    def hit(l):
-        if idpat.search(l): return True
-        for m in (namepat.finditer(l) if namepat else []):
-            prev = re.search(r'([A-Za-z\']+) $', l[:m.start()])
-            nxt = re.match(r" ([A-Za-z']+)", l[m.end():])
-            if not (prev and prev.group(1)[0].isupper()) and not (nxt and nxt.group(1)[0].isupper()): return True  # skip "Venom Knife", "Knife Goblin"
-        return False
-    out = []
-    DOCS = common.DOCS
-    for f in sorted(glob.glob(f'{DOCS}/**/*.md', recursive=True)):
-        base = os.path.relpath(f, DOCS)
-        if base.startswith(('all-patch-notes', 'dev/')) or re.search(r'patch-notes/\d{4}/index', base): continue
-        for n, l in enumerate(Path(f).read_text(encoding='utf-8', errors='replace').splitlines(), 1):
-            if hit(l): out.append((base, n, l.strip()[:200]))
-    return out
+    return common.find_doc_hits([base] if base else [], re.compile(rf'(?<!\d){item_id}(?!\d)'))
 
 if __name__ == '__main__':
     key = sys.argv[1]
