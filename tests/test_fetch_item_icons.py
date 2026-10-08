@@ -64,6 +64,14 @@ class FetchTests(unittest.TestCase):
         code, _, err = self.run_fetch([1, 2, 3]); self.assertEqual(code, 1); self.assertIn('stopping after 1 icons', err)
         self.assertTrue(os.path.exists(f'{self.out}/item1.gif')); self.assertNotIn('3', Handler.hits)
 
+    def test_the_sites_no_image_placeholder_counts_as_not_found(self):
+        ph = gif_bytes(); other = io.BytesIO(); Image.new('RGB', (24, 24), (200, 0, 0)).save(other, 'GIF')
+        Handler.routes = {'99999999': (200, ph), '1': (200, ph), '2': (200, other.getvalue())}
+        code, out, _ = self.run_fetch([1, 2]); self.assertEqual(code, 0)
+        self.assertIn('placeholder for unknown ids: detected', out); self.assertIn('saved 1; not on the site 1', out)
+        self.assertFalse(os.path.exists(f'{self.out}/item1.gif')); self.assertTrue(os.path.exists(f'{self.out}/item2.gif'))
+        self.assertEqual(Path(f'{self.out}/not-found.txt').read_text().split(), ['1'])
+
     def test_limit_dry_run_and_missing_input(self):
         Handler.routes = {str(i): (200, gif_bytes()) for i in (1, 2, 3)}
         self.run_fetch([1, 2, 3], '--limit', '2'); self.assertEqual(sorted(x for x in os.listdir(self.out) if x.endswith('.gif')), ['item1.gif', 'item2.gif'])
