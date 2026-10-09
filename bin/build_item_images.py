@@ -10,9 +10,10 @@ Output (default <data folder>/images/):
   each folder has manifest.csv saying which file each image came from. Items and monsters share IDs, hence the prefixes.
 Cards share one picture: a source file named Card.gif is copied to items/card.gif, and with --cards-from (a rAthena db/ folder, for example
 rathena/db/pre-re) every item of type Card counts as covered by it instead of being listed as missing.
+--aliases takes a CSV (item_id, image) from list_wanted_items.py for icons filed under another name; they fill ids that have no icon of their own.
 --wanted takes a CSV with an item_id column (for example notes/item-images.csv) and reports which of those items still have no image.
 Mobs can share an ID with an item, so mob images go in their own folder as mob<ID>.gif."""
-import argparse, csv, os, re, shutil, sys
+import argparse, csv, io, os, re, shutil, sys
 from pathlib import Path
 ROOT = os.environ.get('GAME_DATA', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 NAME = re.compile(r'(\d{3,7})([_-]\d+)?\.(gif|png)', re.I)
@@ -43,7 +44,7 @@ def choose(cands): return min(cands, key=rank)
 def png_to_gif(src, dst):
     """Save a PNG as a GIF keeping transparent pixels transparent. Returns True if colours had to be reduced (more than 255)."""
     from PIL import Image
-    with Image.open(src) as im:
+    with Image.open(io.BytesIO(src) if isinstance(src, bytes) else src) as im:
         rgba = im.convert('RGBA')
         colors = rgba.getcolors(maxcolors=1 << 20) or []
         reduced = len({c[:3] for _, c in colors if c[3] >= 128}) > 255
@@ -86,6 +87,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--source', action='append', required=True, help='folder to search (repeat)')
     ap.add_argument('--out', default=f'{ROOT}/images', help='collection root: items/ and mobs/ go under it')
+    ap.add_argument('--aliases', help='CSV of item_id,image for icons filed under another name')
     ap.add_argument('--wanted'); ap.add_argument('--cards-from', action='append', default=[], help='rAthena db folder (repeat for pre-re and re); items of type Card are covered by items/card.gif')
     ap.add_argument('--dry-run', action='store_true')
     a = ap.parse_args(argv)
@@ -102,6 +104,16 @@ def main(argv=None):
         others = [c for c in found[i] if c['size'] != ICON]
         if icons: out['items'].append((i, choose(icons), 'item'))
         if others: out['mobs'].append((i, choose(others), 'mob'))
+    if a.aliases:
+        from PIL import Image
+        have_ids = {i for i, _, _ in out['items']}
+        with open(a.aliases, encoding='utf-8') as f:
+            for r in csv.DictReader(f):
+                i, p = int(r['item_id']), Path(r['image'])
+                if i in have_ids or not p.is_file() or (Path(a.out) / 'items' / f'item{i}.gif').exists(): continue   # never replace an icon we already have
+                with Image.open(p) as im: size = im.size
+                if size != ICON: continue
+                out['items'].append((i, {'path': p, 'ext': p.suffix.lstrip('.').lower(), 'size': size, 'alias': True}, 'item')); have_ids.add(i)
     for kind, entries in out.items():
         folder = Path(a.out) / kind
         if not a.dry_run: folder.mkdir(parents=True, exist_ok=True)
@@ -111,7 +123,7 @@ def main(argv=None):
             with open(folder / 'manifest.csv', encoding='utf-8', newline='') as f: old = {r['file']: r for r in csv.DictReader(f)}
         for i, c, prefix in entries:
             dst = folder / f'{prefix}{i}.gif'
-            rows.append([i, dst.name, str(c['path']), f'{c["size"][0]}x{c["size"][1]}', '; '.join(write(c, dst, a.dry_run))])
+            rows.append([i, dst.name, str(c['path']), f'{c["size"][0]}x{c["size"][1]}', '; '.join(write(c, dst, a.dry_run) + (['icon filed under another name'] if c.get('alias') else []))])
         made = {r[1] for r in rows}
         keep = [[r['id'], r['file'], r['source'], r['size'], r['notes']] for r in old.values() if r['file'] not in made and (folder / r['file']).exists()]
         rows += keep   # icons added by other means (downloads) stay in the collection and the manifest

@@ -72,6 +72,15 @@ class FetchTests(unittest.TestCase):
         self.assertFalse(os.path.exists(f'{self.out}/item1.gif')); self.assertTrue(os.path.exists(f'{self.out}/item2.gif'))
         self.assertEqual(Path(f'{self.out}/not-found.txt').read_text().split(), ['1'])
 
+    def test_png_icons_are_converted_and_the_big_placeholder_is_not_found(self):
+        b = io.BytesIO(); Image.new('RGBA', (24, 24), (10, 200, 10, 255)).save(b, 'PNG'); big = io.BytesIO(); Image.new('RGBA', (57, 57), (0, 0, 0, 255)).save(big, 'PNG')
+        Handler.routes = {'99999999': (200, big.getvalue()), '7': (200, b.getvalue()), '8': (200, big.getvalue())}
+        code, out, err = self.run_fetch([7, 8]); self.assertEqual(code, 0)
+        self.assertIn('saved 1; not on the site 1', out); self.assertEqual(err, '')
+        with Image.open(f'{self.out}/item7.gif') as g: self.assertEqual((g.format, g.size), ('GIF', (24, 24)))
+        self.assertFalse(os.path.exists(f'{self.out}/item8.gif'))
+        with open(f'{self.out}/manifest.csv', encoding='utf-8') as fh: self.assertIn('converted from png', fh.read())
+
     def test_limit_dry_run_and_missing_input(self):
         Handler.routes = {str(i): (200, gif_bytes()) for i in (1, 2, 3)}
         self.run_fetch([1, 2, 3], '--limit', '2'); self.assertEqual(sorted(x for x in os.listdir(self.out) if x.endswith('.gif')), ['item1.gif', 'item2.gif'])
