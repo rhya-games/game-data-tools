@@ -38,7 +38,9 @@ def merge(existing, fresh):
         new = fresh[name]
         old = by_id.get(new['id'])
         if old is None: by_id[new['id']] = new
-        else: old.update({k: new[k] for k in REFRESHED})
+        else:
+            old.update({k: new[k] for k in REFRESHED})
+            if old.get('wiki'): old['is_quest'] = True   # the wiki says it is a quest, whatever its ingredients' categories say
     return sorted(by_id.values(), key=lambda r: r['name'].lower())
 
 def main(argv=None):

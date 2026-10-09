@@ -176,7 +176,9 @@ def uaro_rows(path):
     for r in json.loads(Path(path).read_text(encoding='utf-8')).get('quests', []):
         if not r.get('is_quest'): continue
         items = [{'relation': 'takes', 'item': i.get('item_id'), 'item_name': i['item'], 'qty': i.get('qty'), 'npc': r.get('npc') or '', 'map': r.get('location') or '', 'file': 'data/uaro-quests.json', 'mode': 'uaro'} | ({'note': i['note']} if i.get('note') else {}) for i in r['ingredients']]
-        rows.append({'id': r['id'], 'title': r['name'], 'origin': 'uaro', 'uaro': 'yes', 'uaro_note': 'uaRO quest data (' + ', '.join(r.get('categories', [])) + ')', 'client': None, 'db': {}, 'npcs': [], 'items': items, 'categories': r.get('categories', []), 'wiki': r.get('wiki')})
+        npcs = [{'name': r['npc'], 'map': r.get('location') or '', 'file': 'data/uaro-quests.json', 'mode': 'uaro'}] if r.get('npc') else []
+        info = {k: r[k] for k in ('min_level', 'max_level', 'rewards', 'hunt', 'notes', 'source') if r.get(k)}
+        rows.append({'id': r['id'], 'title': r['name'], 'origin': 'uaro', 'uaro': 'yes', 'uaro_note': 'uaRO quest data (' + ', '.join(r.get('categories', [])) + ')', 'client': None, 'db': {}, 'npcs': npcs, 'items': items, 'categories': r.get('categories', []), 'wiki': r.get('wiki'), 'uaro_info': info})
     return rows
 
 def main(argv=None):

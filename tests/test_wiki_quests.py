@@ -1,0 +1,132 @@
+"""Tests for import_wiki_quests.py and how its fields reach the quest index and quests.py."""
+import contextlib, copy, io, json, os, sys, tempfile, unittest
+from pathlib import Path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin'))
+import build_quests as bq, import_loot_sheet as imp, import_wiki_quests as w, quests as q
+
+PAGE = '''# Repeatable EXP Quests
+
+### Item Quest List
+
+| NPC | Location | Min Level | Max Level | Items | Base EXP | Job EXP | Base EXP Per Item | Job EXP Per Item |
+|:---|:---|---:|---:|:---|---:|---:|---:|---:|
+| **Langry** | `/navi gef_fild07 321/193` | 2 | 20 | 25 Fluff | 770 | 60 | 30 | 2 |
+| **Nutters** | `/navi mjolnir_01 293/20` | 18 | 60 | 25 Acorn | 7,200 | 7,810 | 288 | 312 |
+| **Old Man** | `/navi prt_fild00 1/2` | 5 | 9 | 10 Jellopy | 100 | 50 | 1 | 1 |
+| **Broken** | `somewhere` | 5 | 9 | 10 Jellopy | 100 | 50 | 1 | 1 |
+
+The following NPCs offer players a choice of how many monsters they want to hunt, with options of **50**, **100**, or **150**. All three yield the same, hunting **100 monsters** rewarding twice as much as hunting **50**.
+
+### Hunting Quest List
+
+| NPC | Location | Min Level | Max Level | Monster | Base EXP | Job EXP | Base EXP Per Monster | Job EXP Per Monster |
+|:---|:---|---:|---:|:---|---:|---:|---:|---:|
+| **Langry** | `/navi gef_fild07 321/193` | 2 | 20 | Fabre | 770 | 60 | 15 | 1 |
+| **Gandolf** | `/navi lhz_dun01 146/287` | 45 | 80 | Remover`*` | 550,000 | 340,000 | 11,000 | 6,800 |
+
+| Other | Table |
+|:---|:---|
+| not | a quest |
+'''
+def rec(name, ings, **kw): return {'id': imp.slug(name), 'name': name, 'categories': [], 'ingredients': [{'item_id': None, 'item': i, 'qty': n} for i, n in ings], 'is_quest': False, **kw}
+
+class Parsing(unittest.TestCase):
+    def test_small_helpers(self):
+        self.assertEqual(w.clean('**Langry** ![x](img/a.gif) `a`<br>b'), 'Langry a b'); self.assertEqual(w.num('1,162,800 '), 1162800); self.assertIsNone(w.num('-'))
+        self.assertEqual(w.navi('`/navi gef_fild07 321/193`'), 'gef_fild07 321/193'); self.assertIsNone(w.navi('Located in every inn'))
+        self.assertEqual(w.norm("Mr. Smile's [1]"), 'mrsmiles1')
+
+    def test_tables_know_their_heading(self):
+        t = w.md_tables(PAGE); self.assertEqual([x[0] for x in t], ['Item Quest List', 'Hunting Quest List', 'Hunting Quest List'])
+        self.assertEqual(t[0][1][:3], ['NPC', 'Location', 'Min Level']); self.assertEqual(len(t[0][2]), 4); self.assertEqual(t[0][2][1]['Base EXP'], '7,200')
+
+    def test_rows_and_warnings(self):
+        rows, warn = w.repeatable_quests(PAGE); r = {x['name']: x for x in rows}
+        self.assertEqual(sorted(r), ['Gandolf Hunting Quest', 'Langry Hunting Quest', 'Langry Repeatable Quest', 'Nutters Repeatable Quest', 'Old Man Repeatable Quest'])
+        n = r['Nutters Repeatable Quest']
+        self.assertEqual((n['npc'], n['location'], n['min_level'], n['max_level'], n['rewards'], n['ingredients']), ('Nutters', 'mjolnir_01 293/20', 18, 60, {'base_exp': 7200, 'job_exp': 7810}, [{'item': 'Acorn', 'qty': 25}]))
+        self.assertEqual(n['wiki'], 'https://wiki.uaro.net/repeatable-quests/')
+        g = r['Gandolf Hunting Quest']; self.assertEqual(g['hunt'], {'monster': 'Remover', 'quest_access': True, 'counts': [50, 100, 150], 'rewards_for': 50})   # not [50,100,150,50,...] from the next sentence
+        self.assertFalse(r['Langry Hunting Quest']['hunt']['quest_access']); self.assertEqual(r['Langry Hunting Quest']['ingredients'], [])
+        self.assertEqual(len(warn), 1); self.assertIn('Broken', warn[0])
+        rows, warn = w.repeatable_quests(PAGE.replace('options of **50**, **100**, or **150**', 'some options')); self.assertTrue(any('kill counts' in x for x in warn)); self.assertNotIn('counts', rows[-1]['hunt'])
+
+class Applying(unittest.TestCase):
+    def setUp(self):
+        self.rows, _ = w.repeatable_quests(PAGE)
+        self.recs = [rec('Nutters Repeatable Quest', [('Acorn', 25)]), rec('Fluff Thing', [('Fluff', 25)]), rec('Other', [('Fluff', 25)]), rec('Jelly Hat', [('Jellopy', 10)]), rec('Hat Quest', [('Acorn', 99)])]
+    def run_apply(self, **kw): self.rep = w.apply_rows(self.recs, self.rows, **kw); return {r['name']: r for r in self.recs}
+
+    def test_match_by_name_by_ingredients_or_new(self):
+        r = self.run_apply()
+        self.assertEqual(self.rep['by_name'], ['Nutters Repeatable Quest']); self.assertEqual(r['Nutters Repeatable Quest']['npc'], 'Nutters'); self.assertTrue(r['Nutters Repeatable Quest']['is_quest'])
+        self.assertEqual(self.rep['by_ingredients'], ['Old Man Repeatable Quest -> Jelly Hat']); self.assertEqual(r['Jelly Hat']['npc'], 'Old Man')   # one record has exactly these ingredients
+        self.assertEqual(len(self.rep['ambiguous']), 1); self.assertIn('Fluff Thing, Other', self.rep['ambiguous'][0]); self.assertNotIn('npc', r['Fluff Thing']); self.assertNotIn('Langry Repeatable Quest', r)   # two records: left alone
+        self.assertEqual(sorted(self.rep['created']), ['Gandolf Hunting Quest', 'Langry Hunting Quest'])
+        c = r['Gandolf Hunting Quest']; self.assertEqual((c['id'], c['source'], c['is_quest'], c['ingredients'], c['location']), ('uaro-gandolf-hunting-quest', 'wiki', True, [], 'lhz_dun01 146/287'))
+
+    def test_new_record_takes_item_ids_it_already_knows(self):
+        self.recs[0]['ingredients'][0]['item_id'] = 1026; self.rows = [{'name': 'Squirrel Quest', 'npc': 'S', 'ingredients': [{'item': 'Acorn', 'qty': 3}, {'item': 'Moss', 'qty': 1}], 'categories': ['X']}]
+        r = self.run_apply(); self.assertEqual(r['Squirrel Quest']['ingredients'], [{'item_id': 1026, 'item': 'Acorn', 'qty': 3}, {'item': 'Moss', 'qty': 1}])
+
+    def test_hand_fields_are_kept_and_differences_reported(self):
+        self.recs[0].update(npc='Nutters (hand)', min_level=18, notes='mine'); r = self.run_apply()
+        self.assertEqual((r['Nutters Repeatable Quest']['npc'], r['Nutters Repeatable Quest']['notes'], r['Nutters Repeatable Quest']['max_level']), ('Nutters (hand)', 'mine', 60))   # filled the gap, kept the hand value
+        self.assertEqual(self.rep['differs'], ["Nutters Repeatable Quest: npc is 'Nutters (hand)', wiki says 'Nutters'"])   # equal min_level is not a difference
+        r = self.run_apply(overwrite=True); self.assertEqual(r['Nutters Repeatable Quest']['npc'], 'Nutters'); self.assertEqual(r['Nutters Repeatable Quest']['notes'], 'mine')
+
+    def test_ingredient_difference_is_reported_not_applied(self):
+        self.recs[0]['ingredients'][0]['qty'] = 30; r = self.run_apply()
+        self.assertEqual(len(self.rep['ingredient_diffs']), 1); self.assertEqual(r['Nutters Repeatable Quest']['ingredients'][0]['qty'], 30)
+
+    def test_filling_fields_of_an_existing_quest_counts_as_a_change(self):
+        self.recs[0]['is_quest'] = True; self.run_apply(); self.assertIn('uaro-nutters-repeatable-quest', self.rep['changed'])   # or the file would not be written
+
+    def test_second_run_changes_nothing(self):
+        self.run_apply(); after = copy.deepcopy(self.recs); w.apply_rows(self.recs, self.rows); rep = w.apply_rows(self.recs, self.rows)
+        self.assertEqual(self.recs, after); self.assertEqual((rep['changed'], rep['created']), ([], []))
+
+class Cli(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.t = self.tmp.name; Path(f'{self.t}/wiki').mkdir(); Path(f'{self.t}/wiki/repeatable-quests.md').write_text(PAGE)
+        self.data = f'{self.t}/data.json'; Path(self.data).write_text(json.dumps({'about': 'x', 'quests': [rec('Nutters Repeatable Quest', [('Acorn', 25)])]}))
+    def tearDown(self): self.tmp.cleanup()
+    def run_cli(self, *a):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf): w.main(['--wiki', f'{self.t}/wiki', '--data', self.data, *a])
+        return buf.getvalue()
+    def load(self): return {r['name']: r for r in json.loads(Path(self.data).read_text(encoding='utf-8'))['quests']}
+
+    def test_dry_run_writes_nothing_and_a_real_run_is_idempotent(self):
+        before = Path(self.data).read_text(); out = self.run_cli('--dry-run'); self.assertIn('1 matched by name', out); self.assertEqual(Path(self.data).read_text(), before)
+        self.run_cli(); once = Path(self.data).read_text(); self.assertNotEqual(once, before); self.assertIn('0 records changed', self.run_cli()); self.assertEqual(Path(self.data).read_text(), once)
+        r = self.load(); self.assertEqual(r['Nutters Repeatable Quest']['rewards'], {'base_exp': 7200, 'job_exp': 7810}); self.assertTrue(r['Nutters Repeatable Quest']['is_quest'])
+        self.assertEqual(list(r), sorted(r, key=str.lower))
+
+    def test_missing_inputs_are_refused(self):
+        with self.assertRaises(SystemExit): w.main(['--wiki', f'{self.t}/nowhere', '--data', self.data])
+        with self.assertRaises(SystemExit): w.main(['--wiki', f'{self.t}/wiki', '--data', f'{self.t}/none.json'])
+
+    def test_loot_sheet_reimport_keeps_wiki_quests(self):
+        self.run_cli(); loot = [{'name': 'Acorn', 'itemId': 1026, 'categories': ['Cooking'], 'uses': [{'for': 'Nutters Repeatable Quest', 'qty': 25}]}]
+        Path(f'{self.t}/loot.json').write_text(json.dumps(loot))
+        with contextlib.redirect_stdout(io.StringIO()): imp.main(['--loot', f'{self.t}/loot.json', '--out', self.data])
+        r = self.load(); n = r['Nutters Repeatable Quest']
+        self.assertTrue(n['is_quest']); self.assertEqual((n['npc'], n['ingredients'][0]['item_id']), ('Nutters', 1026))   # not a quest by category, but the wiki says so
+        self.assertEqual(r['Gandolf Hunting Quest']['source'], 'wiki')   # records the loot sheet does not know stay
+
+    def test_index_and_lookup_show_the_wiki_fields(self):
+        self.run_cli(); rows = {r['title']: r for r in bq.uaro_rows(self.data)}
+        n = rows['Nutters Repeatable Quest']; self.assertEqual(n['npcs'], [{'name': 'Nutters', 'map': 'mjolnir_01 293/20', 'file': 'data/uaro-quests.json', 'mode': 'uaro'}])
+        self.assertEqual(n['uaro_info'], {'min_level': 18, 'max_level': 60, 'rewards': {'base_exp': 7200, 'job_exp': 7810}}); self.assertEqual(n['wiki'], 'https://wiki.uaro.net/repeatable-quests/')
+        out = f'{self.t}/index/quests.jsonl'; Path(out).parent.mkdir(); Path(out).write_text('\n'.join(json.dumps(r) for r in rows.values()) + '\n')
+        old = q.IDX; q.IDX = out
+        try:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf): q.main(['Gandolf Hunting']); q.main(['Nutters Rep'])
+            s = buf.getvalue()
+        finally: q.IDX = old
+        for want in ('levels: 45-80', 'rewards: 550,000 base exp, 340,000 job exp (for 50 kills)', 'hunt: 50/100/150 x Remover  (map needs a quest to enter)', 'NPCs: Gandolf (lhz_dun01 146/287, uaro)', 'wiki: https://wiki.uaro.net/repeatable-quests/', 'levels: 18-60', 'asks for 25 x Acorn'): self.assertIn(want, s)
+
+if __name__ == '__main__':
+    unittest.main()

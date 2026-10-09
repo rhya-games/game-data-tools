@@ -45,6 +45,12 @@ def show(q):
         bits += [f"drop {x['count']} {x['item_name']} from {x['mob'] or 'any monster'}" + (f" ({x['rate'] / 100:g}%)" if x['rate'] else '') for x in d['drops']]
         print(f"  quest_db ({mode}): " + ('; '.join(bits) or 'no targets'))
     if q['npcs']: print('  NPCs: ' + '; '.join(f"{n['name']} ({n['map'] or 'global'}, {n['mode']})" for n in q['npcs'][:6]) + (f" +{len(q['npcs']) - 6} more" if len(q['npcs']) > 6 else ''))
+    u = q.get('uaro_info') or {}
+    if u.get('min_level') or u.get('max_level'): print(f"  levels: {u.get('min_level', '?')}-{u.get('max_level', '?')}")
+    if u.get('rewards'): print('  rewards: ' + ', '.join(f"{v:,} {k.replace('_', ' ')}" for k, v in u['rewards'].items() if v is not None) + (f" (for {u['hunt']['rewards_for']} kills)" if u.get('hunt', {}).get('rewards_for') else ''))
+    if u.get('hunt'): h = u['hunt']; print(f"  hunt: {'/'.join(map(str, h.get('counts', []))) or '?'} x {h['monster']}" + ('  (map needs a quest to enter)' if h.get('quest_access') else ''))
+    if u.get('notes'): print('  notes:', u['notes'])
+    if q.get('wiki'): print('  wiki:', q['wiki'])
     for a in asked(q): print(f"  asks for {a['qty'] if a['qty'] is not None else '?'} x {a['name']} ({a['item']})  [{'+'.join(sorted(a['rel']))}, {a['npc'] or 'uaRO data'}, {a['file']}]")
     for g in given(q): print(f"  gives {g['qty'] if g['qty'] is not None else '?'} x {g['name']} ({g['item']})  [{g['npc']}]")
 

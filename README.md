@@ -22,6 +22,7 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/backup_collection.py` | Back up `images/` and `notes/` into a verified, timestamped archive (keeps the newest 10; `--also` copies elsewhere) |
 | `bin/quests.py <id or title>` | Look up a quest: client text, kill targets, NPCs, the items it asks for and gives (`--item`, `--mob`, `--stats`) |
 | `bin/build_quests.py` | Build the quest index from the client quest list, the emulator quest databases and NPC scripts |
+| `bin/import_wiki_quests.py --wiki <docs folder>` | Add NPC, location, level range and rewards from the uaRO wiki to `data/uaro-quests.json` (`--dry-run` to preview, `--overwrite` to take the wiki's values) |
 | `bin/save_page.sh <url>` | Save a page byte-for-byte with a metadata file |
 | `bin/fetch_iteminfo.sh` | Download the client item file (variant and version selectable) |
 | `bin/fetch_sprites.sh` | Save all the ai4rei sprite list pages |
@@ -42,6 +43,8 @@ Set `GAME_DATA` to keep the data somewhere other than this folder.
 `setup.sh` downloads the ROenglishRE quest list (`bin/fetch_quest_text.sh`) and runs `bin/build_quests.py`, which merges it with rAthena's quest databases and NPC scripts into `index/quests.jsonl` (about 11,000 quests). Item facts come from the NPC scripts, which are code, so they are heuristic: an item is attached to the nearest quest the NPC mentions, and each one shows the NPC, map and file so you can check it. They describe the official game, not uaRO's own changes.
 
 uaRO's own quests (hat, weapon, pet and other quests) are not in any emulator script. They live in `data/uaro-quests.json`, which this repo owns and which is committed. `bin/import_loot_sheet.py --loot <loot.json>` seeds and refreshes it from the loot sheet's "used for" lists; fields you add by hand (npc, location, wiki, notes) survive a re-import. `build_quests.py` adds those records to the index as quests with ids like `uaro-mystic-rose`.
+
+`bin/import_wiki_quests.py --wiki <path to the wiki's docs folder>` then enriches those records from the uaRO wiki (so far `repeatable-quests.md`: NPC, `/navi` location, level range, EXP rewards, hunting targets). A wiki quest is matched to a record by name, then by its ingredient list; a row that matches several records is listed in the report and left alone, and a row that matches none becomes a new record with `"source": "wiki"`. It only fills fields a record lacks, never overwrites one you set by hand (a different wiki value is reported; `--overwrite` takes it), and running it twice changes nothing. A record with a `wiki` link counts as a quest even when the loot sheet's categories do not say so. `quests.py` shows the NPC, levels, rewards, hunt target and wiki link.
 
 ## Reading the output
 

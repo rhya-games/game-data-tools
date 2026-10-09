@@ -3016,6 +3016,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-coal-miner-hunting-quest",
+   "name": "Coal Miner Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Coal Miner",
+   "location": "mag_dun02 46/40",
+   "min_level": 75,
+   "max_level": 97,
+   "rewards": {
+    "base_exp": 1550936,
+    "job_exp": 930932
+   },
+   "hunt": {
+    "monster": "Deleter",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-coldproof-potion",
    "name": "Coldproof Potion",
    "categories": [
@@ -3595,6 +3625,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-cuir-hunting-quest",
+   "name": "Cuir Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Cuir",
+   "location": "cmd_fild01 362/256",
+   "min_level": 45,
+   "max_level": 80,
+   "rewards": {
+    "base_exp": 137900,
+    "job_exp": 86600
+   },
+   "hunt": {
+    "monster": "Alligator",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-cuir-repeatable-quest",
    "name": "Cuir Repeatable Quest",
    "categories": [
@@ -3610,7 +3670,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Cuir",
+   "location": "cmd_fild01 362/256",
+   "min_level": 45,
+   "max_level": 80,
+   "rewards": {
+    "base_exp": 137900,
+    "job_exp": 86600
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-cursed-spirit-quest",
@@ -4997,6 +5066,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-emmerich-hunting-quest",
+   "name": "Emmerich Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Emmerich",
+   "location": "thor_v03 57/245",
+   "min_level": 75,
+   "max_level": 98,
+   "rewards": {
+    "base_exp": 8600000,
+    "job_exp": 6200000
+   },
+   "hunt": {
+    "monster": "Salamander",
+    "quest_access": true,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-enchant-deadly-poison",
    "name": "Enchant Deadly Poison",
    "categories": [
@@ -6170,6 +6269,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-gandolf-hunting-quest",
+   "name": "Gandolf Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Gandolf",
+   "location": "lhz_dun01 146/287",
+   "min_level": 45,
+   "max_level": 80,
+   "rewards": {
+    "base_exp": 550000,
+    "job_exp": 340000
+   },
+   "hunt": {
+    "monster": "Remover",
+    "quest_access": true,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-gangster-scarf",
    "name": "Gangster Scarf",
    "categories": [
@@ -6828,6 +6957,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-gregor-hunting-quest",
+   "name": "Gregor Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Gregor",
+   "location": "moc_fild02 74/329",
+   "min_level": 10,
+   "max_level": 30,
+   "rewards": {
+    "base_exp": 8000,
+    "job_exp": 4000
+   },
+   "hunt": {
+    "monster": "Peco Peco",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-gregor-repeatable-quest",
    "name": "Gregor Repeatable Quest",
    "categories": [
@@ -6841,7 +7000,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Gregor",
+   "location": "moc_fild02 74/329",
+   "min_level": 10,
+   "max_level": 30,
+   "rewards": {
+    "base_exp": 8000,
+    "job_exp": 4000
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-grief-for-greed",
@@ -7154,6 +7322,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-halgus-hunting-quest",
+   "name": "Halgus Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Halgus",
+   "location": "gef_fild04 191/54",
+   "min_level": 2,
+   "max_level": 20,
+   "rewards": {
+    "base_exp": 770,
+    "job_exp": 60
+   },
+   "hunt": {
+    "monster": "Pupa",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-halgus-repeatable-quest",
    "name": "Halgus Repeatable Quest",
    "categories": [
@@ -7167,7 +7365,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Halgus",
+   "location": "gef_fild04 191/54",
+   "min_level": 2,
+   "max_level": 20,
+   "rewards": {
+    "base_exp": 770,
+    "job_exp": 60
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-hammer",
@@ -7386,6 +7593,36 @@
     }
    ],
    "is_quest": true
+  },
+  {
+   "id": "uaro-henry-hunting-quest",
+   "name": "Henry Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Henry",
+   "location": "ice_dun03 140/26",
+   "min_level": 70,
+   "max_level": 95,
+   "rewards": {
+    "base_exp": 3640000,
+    "job_exp": 2600000
+   },
+   "hunt": {
+    "monster": "Ice Titan",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-herb-marinade-beef",
@@ -7979,6 +8216,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-jotun-tribesman-hunting-quest",
+   "name": "Jotun Tribesman Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Jotun Tribesman",
+   "location": "mag_dun01 127/71",
+   "min_level": 75,
+   "max_level": 97,
+   "rewards": {
+    "base_exp": 1939200,
+    "job_exp": 1162800
+   },
+   "hunt": {
+    "monster": "Lava Golem",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-juno-quests",
    "name": "Juno Quests",
    "categories": [
@@ -8071,6 +8338,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-kirby-hunting-quest",
+   "name": "Kirby Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Kirby",
+   "location": "nyd_dun01 146/154",
+   "min_level": 75,
+   "max_level": 98,
+   "rewards": {
+    "base_exp": 3700000,
+    "job_exp": 2800000
+   },
+   "hunt": {
+    "monster": "Draco",
+    "quest_access": true,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-kitsune-mask",
    "name": "Kitsune Mask",
    "categories": [
@@ -8157,6 +8454,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-laertes-hunting-quest",
+   "name": "Laertes Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Laertes",
+   "location": "prt_fild04 356/148",
+   "min_level": 15,
+   "max_level": 45,
+   "rewards": {
+    "base_exp": 5900,
+    "job_exp": 2250
+   },
+   "hunt": {
+    "monster": "Creamy",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-laertes-repeatable-quest",
    "name": "Laertes Repeatable Quest",
    "categories": [
@@ -8170,7 +8497,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Laertes",
+   "location": "prt_fild04 356/148",
+   "min_level": 15,
+   "max_level": 45,
+   "rewards": {
+    "base_exp": 5900,
+    "job_exp": 2250
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-lance",
@@ -8221,6 +8557,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-langry-hunting-quest",
+   "name": "Langry Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Langry",
+   "location": "gef_fild07 321/193",
+   "min_level": 2,
+   "max_level": 20,
+   "rewards": {
+    "base_exp": 770,
+    "job_exp": 60
+   },
+   "hunt": {
+    "monster": "Fabre",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-langry-repeatable-quest",
    "name": "Langry Repeatable Quest",
    "categories": [
@@ -8235,7 +8601,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Langry",
+   "location": "gef_fild07 321/193",
+   "min_level": 2,
+   "max_level": 20,
+   "rewards": {
+    "base_exp": 770,
+    "job_exp": 60
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-lazy-smokie",
@@ -8303,6 +8678,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-lella-hunting-quest",
+   "name": "Lella Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Lella",
+   "location": "ayo_fild01 44/241",
+   "min_level": 36,
+   "max_level": 65,
+   "rewards": {
+    "base_exp": 51480,
+    "job_exp": 63024
+   },
+   "hunt": {
+    "monster": "Leaf Cat",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-lella-repeatable-quest",
    "name": "Lella Repeatable Quest",
    "categories": [
@@ -8319,7 +8724,46 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Lella",
+   "location": "ayo_fild01 44/241",
+   "min_level": 36,
+   "max_level": 65,
+   "rewards": {
+    "base_exp": 51480,
+    "job_exp": 63024
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
+   "id": "uaro-lemly-hunting-quest",
+   "name": "Lemly Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Lemly",
+   "location": "moc_fild17 66/273",
+   "min_level": 30,
+   "max_level": 65,
+   "rewards": {
+    "base_exp": 60000,
+    "job_exp": 46000
+   },
+   "hunt": {
+    "monster": "Frilldora",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-lemly-repeatable-quest",
@@ -8336,7 +8780,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Lemly",
+   "location": "moc_fild17 66/273",
+   "min_level": 30,
+   "max_level": 65,
+   "rewards": {
+    "base_exp": 60000,
+    "job_exp": 46000
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-level-1-cookbook",
@@ -8423,6 +8876,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-li-hunting-quest",
+   "name": "Li Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Li",
+   "location": "pay_fild10 108/357",
+   "min_level": 35,
+   "max_level": 70,
+   "rewards": {
+    "base_exp": 84000,
+    "job_exp": 72000
+   },
+   "hunt": {
+    "monster": "Dokebi",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-li-repeatable-quest",
    "name": "Li Repeatable Quest",
    "categories": [
@@ -8438,7 +8921,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Li",
+   "location": "pay_fild10 108/357",
+   "min_level": 35,
+   "max_level": 70,
+   "rewards": {
+    "base_exp": 84000,
+    "job_exp": 72000
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-lightning-jolt",
@@ -8457,6 +8949,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-lilla-hunting-quest",
+   "name": "Lilla Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Lilla",
+   "location": "um_fild01 35/281",
+   "min_level": 60,
+   "max_level": 85,
+   "rewards": {
+    "base_exp": 524970,
+    "job_exp": 283670
+   },
+   "hunt": {
+    "monster": "Dryad",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-lilla-repeatable-quest",
    "name": "Lilla Repeatable Quest",
    "categories": [
@@ -8471,7 +8993,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Lilla",
+   "location": "um_fild01 35/281",
+   "min_level": 60,
+   "max_level": 85,
+   "rewards": {
+    "base_exp": 524970,
+    "job_exp": 283670
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-little-angel-doll",
@@ -8535,6 +9066,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-local-villager-hunting-quest",
+   "name": "Local Villager Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Local Villager",
+   "location": "ein_fild01 43/249",
+   "min_level": 60,
+   "max_level": 74,
+   "rewards": {
+    "base_exp": 500532,
+    "job_exp": 288904
+   },
+   "hunt": {
+    "monster": "Demon Pungus",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-local-villager-repeatable-quest",
    "name": "Local Villager Repeatable Quest",
    "categories": [
@@ -8549,7 +9110,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Local Villager",
+   "location": "ein_fild01 43/249",
+   "min_level": 60,
+   "max_level": 74,
+   "rewards": {
+    "base_exp": 500532,
+    "job_exp": 288904
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-longinus-s-spear",
@@ -9209,6 +9779,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-miner-hunting-quest",
+   "name": "Miner Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Miner",
+   "location": "beach_dun 269/71",
+   "min_level": 75,
+   "max_level": 97,
+   "rewards": {
+    "base_exp": 2062800,
+    "job_exp": 1409100
+   },
+   "hunt": {
+    "monster": "Medusa",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-mirror-image",
    "name": "Mirror Image",
    "categories": [
@@ -9352,6 +9952,36 @@
     }
    ],
    "is_quest": true
+  },
+  {
+   "id": "uaro-monica-hunting-quest",
+   "name": "Monica Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Monica",
+   "location": "geffen 112/63",
+   "min_level": 70,
+   "max_level": 98,
+   "rewards": {
+    "base_exp": 5300000,
+    "job_exp": 3800000
+   },
+   "hunt": {
+    "monster": "Succubus",
+    "quest_access": true,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-monk-job-quest",
@@ -9845,6 +10475,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-nutters-hunting-quest",
+   "name": "Nutters Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Nutters",
+   "location": "mjolnir_01 293/20",
+   "min_level": 18,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 7200,
+    "job_exp": 7810
+   },
+   "hunt": {
+    "monster": "Coco",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-nutters-repeatable-quest",
    "name": "Nutters Repeatable Quest",
    "categories": [
@@ -9859,7 +10519,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Nutters",
+   "location": "mjolnir_01 293/20",
+   "min_level": 18,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 7200,
+    "job_exp": 7810
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-odin-s-temple-excavation-quest",
@@ -10521,6 +11190,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-private-jeremy-hunting-quest",
+   "name": "Private Jeremy Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Private Jeremy",
+   "location": "moc_fild11 57/138",
+   "min_level": 25,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 28000,
+    "job_exp": 18000
+   },
+   "hunt": {
+    "monster": "Golem",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-private-jeremy-repeatable-quest",
    "name": "Private Jeremy Repeatable Quest",
    "categories": [
@@ -10535,7 +11234,46 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Private Jeremy",
+   "location": "moc_fild11 57/138",
+   "min_level": 25,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 28000,
+    "job_exp": 18000
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
+   "id": "uaro-ptero-hunting-quest",
+   "name": "Ptero Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Ptero",
+   "location": "abyss_03 117/31",
+   "min_level": 75,
+   "max_level": 97,
+   "rewards": {
+    "base_exp": 2570000,
+    "job_exp": 1630000
+   },
+   "hunt": {
+    "monster": "Gold Acidus",
+    "quest_access": true,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-puppy-hat",
@@ -11668,6 +12406,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-shea-hunting-quest",
+   "name": "Shea Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Shea",
+   "location": "tur_dun03 125/195",
+   "min_level": 60,
+   "max_level": 85,
+   "rewards": {
+    "base_exp": 850000,
+    "job_exp": 550000
+   },
+   "hunt": {
+    "monster": "Assaulter",
+    "quest_access": true,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-shiny-marinade-beef",
    "name": "Shiny Marinade Beef",
    "categories": [
@@ -11734,6 +12502,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-shone-hunting-quest",
+   "name": "Shone Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Shone",
+   "location": "moc_fild17 208/346",
+   "min_level": 25,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 31550,
+    "job_exp": 22500
+   },
+   "hunt": {
+    "monster": "Hode",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-shone-repeatable-quest",
    "name": "Shone Repeatable Quest",
    "categories": [
@@ -11747,7 +12545,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Shone",
+   "location": "moc_fild17 208/346",
+   "min_level": 25,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 39438,
+    "job_exp": 28120
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-sign-quest",
@@ -13993,6 +14800,36 @@
    "is_quest": true
   },
   {
+   "id": "uaro-vegetable-farmer-hunting-quest",
+   "name": "Vegetable Farmer Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Vegetable Farmer",
+   "location": "ein_fild06 82/171",
+   "min_level": 70,
+   "max_level": 85,
+   "rewards": {
+    "base_exp": 1033956,
+    "job_exp": 620620
+   },
+   "hunt": {
+    "monster": "Goat",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-vegetable-farmer-repeatable-quest",
    "name": "Vegetable Farmer Repeatable Quest",
    "categories": [
@@ -14007,7 +14844,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Vegetable Farmer",
+   "location": "ein_fild06 82/171",
+   "min_level": 70,
+   "max_level": 85,
+   "rewards": {
+    "base_exp": 516978,
+    "job_exp": 310310
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-veins-siblings-quest",
@@ -14565,6 +15411,36 @@
    "is_quest": false
   },
   {
+   "id": "uaro-yullo-hunting-quest",
+   "name": "Yullo Hunting Quest",
+   "categories": [
+    "Repeatable Quest",
+    "Hunting Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Yullo",
+   "location": "mjolnir_01 296/29",
+   "min_level": 24,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 20850,
+    "job_exp": 12544
+   },
+   "hunt": {
+    "monster": "Caramel",
+    "quest_access": false,
+    "counts": [
+     50,
+     100,
+     150
+    ],
+    "rewards_for": 50
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
    "id": "uaro-yullo-repeatable-quest",
    "name": "Yullo Repeatable Quest",
    "categories": [
@@ -14578,7 +15454,16 @@
      "note": "each turn-in"
     }
    ],
-   "is_quest": false
+   "is_quest": true,
+   "npc": "Yullo",
+   "location": "mjolnir_01 296/29",
+   "min_level": 24,
+   "max_level": 60,
+   "rewards": {
+    "base_exp": 20850,
+    "job_exp": 12544
+   },
+   "wiki": "https://wiki.uaro.net/repeatable-quests/"
   },
   {
    "id": "uaro-zealotus-mask",
