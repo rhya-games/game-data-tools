@@ -54,6 +54,14 @@ class Classify(unittest.TestCase):
         Path(f'{self.t}/loot.json').write_text(json.dumps([{'itemId': 1005}]))
         rows, _ = self.run_classify('--loot', f'{self.t}/loot.json'); self.assertEqual(rows['1005.gif']['monster_points'], '5')   # big (2) + @mi (3); id is both so no extra point
 
+    def test_overrides_settle_unsure_files_and_beat_the_evidence(self):
+        Path(f'{self.t}/over.csv').write_text('file,verdict,note\n9000.gif,monster,a pet\n501.gif,monster,\n')
+        rows, text = self.run_classify('--overrides', f'{self.t}/over.csv')
+        self.assertEqual((rows['9000.gif']['verdict'], rows['9000.gif']['confidence']), ('monster', 'manual')); self.assertIn('a pet', rows['9000.gif']['reasons'])
+        self.assertEqual(rows['501.gif']['verdict'], 'monster'); self.assertNotIn('unsure 9000.gif', text)
+        Path(f'{self.t}/bad.csv').write_text('file,verdict\n9000.gif,maybe\n')
+        with self.assertRaises(SystemExit): self.run_classify('--overrides', f'{self.t}/bad.csv')
+
     def test_bad_input_exits(self):
         with self.assertRaises(SystemExit): c.main(['--docs', f'{self.t}/none'])
         os.makedirs(f'{self.t}/empty/img')

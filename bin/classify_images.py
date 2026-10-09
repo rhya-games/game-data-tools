@@ -8,6 +8,7 @@ Evidence per id (one point scale, item vs monster):
   ids       known only as an item (client file, emulator item db, loot sheet): item +1; known only as a monster: monster +1; both: 0
 A verdict needs a lead of 2 points; a smaller lead is "unsure", and conflicting evidence (for example an icon-sized picture on an
 @mi line) is always "unsure". --item-db / --mob-db take rAthena db folders (item_db_*.yml / mob_db.yml), repeatable.
+--overrides takes a CSV (file, verdict[, note]) of your own decisions, which win over the evidence and are marked manual, so they survive re-runs.
 Writes <out> (default notes/image-classes.csv) with the evidence and a reasons column, and prints the unsure ones."""
 import argparse, csv, glob, json, os, re, sys
 from pathlib import Path
@@ -58,6 +59,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--docs', required=True); ap.add_argument('--images'); ap.add_argument('--client'); ap.add_argument('--loot')
     ap.add_argument('--item-db', action='append', default=[]); ap.add_argument('--mob-db', action='append', default=[])
+    ap.add_argument('--overrides', help='CSV of file,verdict[,note] decisions that win over the evidence')
     ap.add_argument('--out', default=f'{ROOT}/notes/image-classes.csv')
     a = ap.parse_args(argv)
     if not os.path.isdir(a.docs): die(f'{a.docs} is not a folder')
@@ -73,12 +75,19 @@ def main(argv=None):
     loot = set()
     if a.loot: loot = {x['itemId'] for x in json.loads(Path(a.loot).read_text(encoding='utf-8')) if x.get('itemId')}
     mobs = emulator_ids(a.mob_db, 'mob_db.yml', 'Body')
+    over = {}
+    if a.overrides:
+        with open(a.overrides, encoding='utf-8', newline='') as f:
+            for r in csv.DictReader(f):
+                if r['verdict'] not in ('item', 'monster'): die(f'{a.overrides}: verdict must be item or monster, not {r["verdict"]!r}')
+                over[r['file'].lower()] = (r['verdict'], r.get('note') or '')
     ctx = doc_context(a.docs); rows = []
     for i in sorted(cands):
         for x in sorted(cands[i], key=lambda x: str(x['path'])):
             rel = x['path'].relative_to(images).as_posix()
             c = ctx.get(rel.lower(), {'mi': 0, 'ii': 0, 'pages': set()})
             v, conf, ip, mp, why = verdict(x['size'] == b.ICON, c['mi'], c['ii'], i in items or i in loot, i in mobs)
+            if rel.lower() in over: v, conf, why = over[rel.lower()][0], 'manual', f'your decision{": " + over[rel.lower()][1] if over[rel.lower()][1] else ""} (evidence said: {v if v != "unsure" else "unsure"}; {why})'
             rows.append([i, rel, v, conf, ip, mp, f'{x["size"][0]}x{x["size"][1]}', int(i in items), int(i in loot), int(i in mobs), c['ii'], c['mi'], ' '.join(sorted(c['pages']))[:80], why])
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     with open(a.out, 'w', newline='', encoding='utf-8') as f:
