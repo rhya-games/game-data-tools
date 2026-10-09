@@ -33,7 +33,7 @@ def given(q):
     return list(out.values())
 
 def show(q):
-    print(f"Quest {q['id']}: {q['title']}" + (f"   [not on uaRO: {q['uaro_note']}]" if q.get('uaro') == 'no' else f"   [on uaRO: {q['uaro_note']}]" if q.get('uaro') == 'yes' else ''))
+    print(f"Quest {q['id']}: {q['title']}" + (f"  [uaRO: {', '.join(q.get('categories', []))}]" if q.get('origin') == 'uaro' else '') + (f"   [not on uaRO: {q['uaro_note']}]" if q.get('uaro') == 'no' else f"   [on uaRO: {q['uaro_note']}]" if q.get('uaro') == 'yes' else ''))
     c = q.get('client')
     if c:
         for l in c['description']: print('   ', l)
@@ -45,7 +45,7 @@ def show(q):
         bits += [f"drop {x['count']} {x['item_name']} from {x['mob'] or 'any monster'}" + (f" ({x['rate'] / 100:g}%)" if x['rate'] else '') for x in d['drops']]
         print(f"  quest_db ({mode}): " + ('; '.join(bits) or 'no targets'))
     if q['npcs']: print('  NPCs: ' + '; '.join(f"{n['name']} ({n['map'] or 'global'}, {n['mode']})" for n in q['npcs'][:6]) + (f" +{len(q['npcs']) - 6} more" if len(q['npcs']) > 6 else ''))
-    for a in asked(q): print(f"  asks for {a['qty'] if a['qty'] is not None else '?'} x {a['name']} ({a['item']})  [{'+'.join(sorted(a['rel']))}, {a['npc']}, {a['file']}]")
+    for a in asked(q): print(f"  asks for {a['qty'] if a['qty'] is not None else '?'} x {a['name']} ({a['item']})  [{'+'.join(sorted(a['rel']))}, {a['npc'] or 'uaRO data'}, {a['file']}]")
     for g in given(q): print(f"  gives {g['qty'] if g['qty'] is not None else '?'} x {g['name']} ({g['item']})  [{g['npc']}]")
 
 def main(argv=None):
@@ -55,14 +55,14 @@ def main(argv=None):
     if only: rows = [r for r in rows if r.get('uaro') != 'no']
     if not a: die('give a quest id, title, --item, --mob or --stats')
     if a == ['--stats']:
-        print(f"{len(rows)} quests: {sum(bool(r['client']) for r in rows)} with client text, {sum(bool(r['db']) for r in rows)} in quest_db, {sum(bool(r['npcs']) for r in rows)} in NPC scripts, {sum(bool(asked(r)) for r in rows)} asking for items, {sum(bool(given(r)) for r in rows)} giving items, {sum(r.get('uaro') == 'yes' for r in rows)} marked on uaRO, {sum(r.get('uaro') == 'no' for r in rows)} marked not on uaRO"); return 0
+        print(f"{len(rows)} quests: {sum(bool(r['client']) for r in rows)} with client text, {sum(bool(r['db']) for r in rows)} in quest_db, {sum(bool(r['npcs']) for r in rows)} in NPC scripts, {sum(bool(asked(r)) for r in rows)} asking for items, {sum(bool(given(r)) for r in rows)} giving items, {sum(r.get('origin') == 'uaro' for r in rows)} uaRO's own, {sum(r.get('uaro') == 'yes' for r in rows)} marked on uaRO, {sum(r.get('uaro') == 'no' for r in rows)} marked not on uaRO"); return 0
     if a[0] == '--item':
         if len(a) < 2: die('--item needs an item id or name')
         key, gives = a[1].lower(), '--gives' in a
         pick = given if gives else asked
         hits = [(r, g) for r in rows for g in pick(r) if str(g['item']) == key or key in (g['name'] or '').lower()]
         print(f"{len(hits)} quest(s) {'give' if gives else 'ask for'} {a[1]}:")
-        for r, g in hits[:60]: print(f"  {r['id']:>6}  {r['title'][:46]:46} {g['qty'] if g['qty'] is not None else '?'} x {g['name']}  [{g['npc']}]" + ('  (not on uaRO)' if r.get('uaro') == 'no' else '  (on uaRO)' if r.get('uaro') == 'yes' else ''))
+        for r, g in hits[:60]: print(f"  {r['id']:>6}  {r['title'][:46]:46} {g['qty'] if g['qty'] is not None else '?'} x {g['name']}  [{g['npc'] or 'uaRO data'}]" + ('  (not on uaRO)' if r.get('uaro') == 'no' else '  (on uaRO)' if r.get('uaro') == 'yes' else ''))
         if len(hits) > 60: print(f'  ... {len(hits) - 60} more')
         return 0
     if a[0] == '--mob':

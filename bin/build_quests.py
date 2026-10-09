@@ -8,6 +8,8 @@ Sources (all read from the data folder, nothing is downloaded here):
 --uaro CSV (default notes/quest-uaro.csv) records what is and is not on uaRO. Columns: scope,value,status,note (status yes or no, default no). Scopes: file (an NPC script path, or a folder
 ending in /), quest (an id), range (ids a-b), title (text in the title). A quest from scripts is marked "no" when every NPC that handles
 it is in the marked files, and "yes" when any of them is; id, range and title rules mark it directly. The first matching rule wins, so put exceptions first. Unmarked quests are "unknown".
+uaRO's own quests (hat, weapon, pet and other quests) come from data/uaro-quests.json, which this repo owns (seeded by import_loot_sheet.py).
+They appear as quests with ids like uaro-mystic-rose, origin "uaro", status yes, and their ingredients as items taken.
 Script facts are heuristic: an item is attached to the nearest quest id mentioned before it in the same NPC (or the first one after it),
 and every item carries the NPC, map and file it came from so it can be checked. Items given as variables or expressions are skipped."""
 import argparse, json, os, re, sys
@@ -167,8 +169,19 @@ def uaro_status(qid, title, npcs, rules):
             if (r['status'] == 'yes' and any(hit)) or (r['status'] == 'no' and all(hit)): return r['status'], r.get('note', '')
     return 'unknown', ''
 
+def uaro_rows(path):
+    """Index rows for the uaRO quests in data/uaro-quests.json (records flagged is_quest)."""
+    if not path or not os.path.isfile(path): return []
+    rows = []
+    for r in json.loads(Path(path).read_text(encoding='utf-8')).get('quests', []):
+        if not r.get('is_quest'): continue
+        items = [{'relation': 'takes', 'item': i.get('item_id'), 'item_name': i['item'], 'qty': i.get('qty'), 'npc': r.get('npc') or '', 'map': r.get('location') or '', 'file': 'data/uaro-quests.json', 'mode': 'uaro'} | ({'note': i['note']} if i.get('note') else {}) for i in r['ingredients']]
+        rows.append({'id': r['id'], 'title': r['name'], 'origin': 'uaro', 'uaro': 'yes', 'uaro_note': 'uaRO quest data (' + ', '.join(r.get('categories', [])) + ')', 'client': None, 'db': {}, 'npcs': [], 'items': items, 'categories': r.get('categories', []), 'wiki': r.get('wiki')})
+    return rows
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--uaro-data', default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'uaro-quests.json'))
     ap.add_argument('--client', default=f'{ROOT}/pages/downloads/OngoingQuests.lub'); ap.add_argument('--rathena', default=f'{ROOT}/rathena')
     ap.add_argument('--out', default=f'{ROOT}/index/quests.jsonl'); ap.add_argument('--uaro', default=f'{ROOT}/notes/quest-uaro.csv', help='CSV of rules marking quests that are not on uaRO')
     a = ap.parse_args(argv)
@@ -187,9 +200,11 @@ def main(argv=None):
             status, why = uaro_status(i, title, s['npcs'], rules)
             row = {'id': i, 'title': title, 'uaro': status, 'uaro_note': why, 'client': c, 'db': {m: dbs[m][i] for m in dbs if i in dbs[m]}, 'npcs': s['npcs'], 'items': s['items']}
             f.write(json.dumps(row, ensure_ascii=False) + '\n'); marked += status != 'unknown'
+        extra = uaro_rows(a.uaro_data)
+        for row in extra: f.write(json.dumps(row, ensure_ascii=False) + '\n')
     os.replace(tmp, a.out)
     asked = sum(1 for i in ids if any(x['relation'] in ('takes', 'checks') for x in scripts.get(i, {}).get('items', [])))
-    print(f'{len(ids)} quests ({marked} marked yes/no for uaRO) -> {a.out}: {len(client)} with client text, {len(dbs["pre-re"])} pre-re / {len(dbs["re"])} re in quest_db, {len(scripts)} found in NPC scripts, {asked} asking for items')
+    print(f'{len(ids)} official quests ({marked} marked yes/no for uaRO) + {len(extra)} uaRO quests -> {a.out}: {len(client)} with client text, {len(dbs["pre-re"])} pre-re / {len(dbs["re"])} re in quest_db, {len(scripts)} found in NPC scripts, {asked} asking for items')
     return 0
 
 if __name__ == '__main__':

@@ -41,6 +41,8 @@ Set `GAME_DATA` to keep the data somewhere other than this folder.
 
 `setup.sh` downloads the ROenglishRE quest list (`bin/fetch_quest_text.sh`) and runs `bin/build_quests.py`, which merges it with rAthena's quest databases and NPC scripts into `index/quests.jsonl` (about 11,000 quests). Item facts come from the NPC scripts, which are code, so they are heuristic: an item is attached to the nearest quest the NPC mentions, and each one shows the NPC, map and file so you can check it. They describe the official game, not uaRO's own changes.
 
+uaRO's own quests (hat, weapon, pet and other quests) are not in any emulator script. They live in `data/uaro-quests.json`, which this repo owns and which is committed. `bin/import_loot_sheet.py --loot <loot.json>` seeds and refreshes it from the loot sheet's "used for" lists; fields you add by hand (npc, location, wiki, notes) survive a re-import. `build_quests.py` adds those records to the index as quests with ids like `uaro-mystic-rose`.
+
 ## Reading the output
 
 - Monster and skill tables compare Hercules against rAthena within each mode (`[re] Exp: ...`). Differences between pre-renewal and renewal are listed on one separate line, because they are expected.

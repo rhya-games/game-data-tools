@@ -3,7 +3,7 @@ import contextlib, io, json, os, sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin'))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import build_quests as bq, quests as q
+import build_quests as bq, import_loot_sheet as imp, quests as q
 from test_network_scripts import FakeNetwork, ok, API
 
 CLIENT = 'QuestInfoList = {\n\t[1180] = {\n\t\tTitle = "Get Rid of \\"Bakonawa\\"",\n\t\tDescription = {\n\t\t\t"Retrieve 2 Lost Belongings.",\n\t\t\t"Line two."\n\t\t},\n\t\tSummary = "Talk to him"\n\t},\n\t[1181] = {\n\t\tTitle = "Other",\n\t\tDescription = {\n\t\t},\n\t\tSummary = ""\n\t},\n}\n'
@@ -63,6 +63,51 @@ class Parsing(unittest.TestCase):
         (_, _, ids, _), = bq.parse_script('prt,1,1,1\tscript\tNPC\t1,{\n\tchangequest 5000,5001;\n}\n', {}, {})
         self.assertEqual(ids, [5000, 5001])
 
+LOOT = [
+    {'name': 'Agate', 'itemId': 730, 'categories': ['Other Quest', 'uaRO'], 'uses': [{'for': 'Great Axe', 'qty': 30, 'note': 'Level 4 weapon quest'}, {'for': 'Great Axe', 'qty': 30, 'note': 'Level 4 weapon quest'}]},
+    {'name': 'Rose', 'itemId': 748, 'categories': ['Official Hat Quest'], 'uses': [{'for': 'Mystic Rose', 'qty': 3}]},
+    {'name': 'Gem', 'itemId': 731, 'categories': ['Cooking', 'Not Reviewed'], 'uses': [{'for': 'Mystic Rose', 'qty': 10}, {'for': 'Soup'}]},
+    {'name': 'Junk', 'itemId': None, 'categories': ['No Use'], 'uses': []},
+]
+
+class UaroData(unittest.TestCase):
+    def setUp(self): self.tmp = tempfile.TemporaryDirectory(); self.t = self.tmp.name; Path(f'{self.t}/loot.json').write_text(json.dumps(LOOT))
+    def tearDown(self): self.tmp.cleanup()
+    def run_import(self, *extra):
+        with contextlib.redirect_stdout(io.StringIO()): imp.main(['--loot', f'{self.t}/loot.json', '--out', f'{self.t}/data/uaro-quests.json', *extra])
+        return {r['name']: r for r in json.loads(Path(f'{self.t}/data/uaro-quests.json').read_text(encoding='utf-8'))['quests']}
+
+    def test_invert_groups_ingredients_by_target(self):
+        r = self.run_import()
+        self.assertEqual(sorted(r), ['Great Axe', 'Mystic Rose', 'Soup']); self.assertEqual(r['Mystic Rose']['id'], 'uaro-mystic-rose')
+        self.assertEqual(r['Mystic Rose']['ingredients'], [{'item_id': 731, 'item': 'Gem', 'qty': 10}, {'item_id': 748, 'item': 'Rose', 'qty': 3}])
+        self.assertEqual(r['Great Axe']['ingredients'], [{'item_id': 730, 'item': 'Agate', 'qty': 30, 'note': 'Level 4 weapon quest'}])   # a repeated use appears once
+        self.assertEqual(r['Mystic Rose']['categories'], ['Cooking', 'Official Hat Quest']); self.assertEqual(r['Great Axe']['categories'], ['Other Quest'])   # placeholders dropped
+        self.assertTrue(r['Mystic Rose']['is_quest'] and r['Great Axe']['is_quest'] and not r['Soup']['is_quest'])
+
+    def test_reimport_keeps_hand_added_fields_and_records(self):
+        self.run_import(); p = Path(f'{self.t}/data/uaro-quests.json'); d = json.loads(p.read_text(encoding='utf-8'))
+        for r in d['quests']:
+            if r['name'] == 'Mystic Rose': r['npc'] = 'Rose Lady'; r['wiki'] = 'x'; r['ingredients'] = []
+        d['quests'].append({'id': 'uaro-custom', 'name': 'Custom Quest', 'categories': [], 'ingredients': [], 'is_quest': True, 'npc': 'Me'}); p.write_text(json.dumps(d))
+        r = self.run_import()
+        self.assertEqual((r['Mystic Rose']['npc'], r['Mystic Rose']['wiki']), ('Rose Lady', 'x')); self.assertEqual(len(r['Mystic Rose']['ingredients']), 2)   # ingredients are refreshed
+        self.assertEqual(r['Custom Quest']['npc'], 'Me')
+
+    def test_bad_input_is_refused(self):
+        Path(f'{self.t}/bad.json').write_text('{not json'); 
+        with self.assertRaises(SystemExit): imp.main(['--loot', f'{self.t}/bad.json', '--out', f'{self.t}/o.json'])
+        Path(f'{self.t}/other.json').write_text('[{"name": "x"}]')
+        with self.assertRaises(SystemExit): imp.main(['--loot', f'{self.t}/other.json', '--out', f'{self.t}/o.json'])
+        with self.assertRaises(SystemExit): imp.main(['--loot', f'{self.t}/missing.json'])
+
+    def test_uaro_quests_join_the_index(self):
+        self.run_import(); rows = bq.uaro_rows(f'{self.t}/data/uaro-quests.json')
+        self.assertEqual(sorted(r['id'] for r in rows), ['uaro-great-axe', 'uaro-mystic-rose'])   # recipes are not quests
+        r = [x for x in rows if x['id'] == 'uaro-mystic-rose'][0]
+        self.assertEqual((r['origin'], r['uaro'], r['title']), ('uaro', 'yes', 'Mystic Rose')); self.assertEqual([(i['item_name'], i['qty'], i['relation']) for i in r['items']], [('Gem', 10, 'takes'), ('Rose', 3, 'takes')])
+        self.assertEqual(bq.uaro_rows('/nonexistent.json'), [])
+
 class UaroRules(unittest.TestCase):
     NPC = lambda f: {'name': 'n', 'map': 'm', 'file': f, 'mode': 're'}
     def rules(self, text):
@@ -103,7 +148,7 @@ class EndToEnd(unittest.TestCase):
         Path(f'{t}/rathena/npc/re/quests').mkdir(parents=True); Path(f'{t}/rathena/npc/re/quests/q.txt').write_text(SCRIPT)
         Path(f'{t}/client.lub').write_text(CLIENT)
         self.out = f'{t}/index/quests.jsonl'
-        with contextlib.redirect_stdout(io.StringIO()): bq.main(['--client', f'{t}/client.lub', '--rathena', f'{t}/rathena', '--out', self.out])
+        with contextlib.redirect_stdout(io.StringIO()): bq.main(['--client', f'{t}/client.lub', '--rathena', f'{t}/rathena', '--out', self.out, '--uaro-data', f'{t}/none.json'])
         self.rows = {r['id']: r for r in map(json.loads, Path(self.out).read_text(encoding='utf-8').splitlines())}
     def tearDown(self): self.tmp.cleanup()
 
@@ -115,7 +160,7 @@ class EndToEnd(unittest.TestCase):
 
     def test_uaro_rules_mark_quests_and_the_cli_can_hide_them(self):
         rules = f'{self.t}/rules.csv'; Path(rules).write_text('scope,value,note\nfile,npc/re/quests/q.txt,not on uaRO\n'); out = f'{self.t}/index/marked.jsonl'
-        with contextlib.redirect_stdout(io.StringIO()): bq.main(['--client', f'{self.t}/client.lub', '--rathena', f'{self.t}/rathena', '--out', out, '--uaro', rules])
+        with contextlib.redirect_stdout(io.StringIO()): bq.main(['--client', f'{self.t}/client.lub', '--rathena', f'{self.t}/rathena', '--out', out, '--uaro', rules, '--uaro-data', f'{self.t}/none.json'])
         rows = {r['id']: r for r in map(json.loads, Path(out).read_text(encoding='utf-8').splitlines())}
         self.assertEqual((rows[1180]['uaro'], rows[1181]['uaro']), ('no', 'unknown')); self.assertEqual(rows[1180]['uaro_note'], 'not on uaRO')
         old = q.IDX; q.IDX = out
