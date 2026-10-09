@@ -50,6 +50,21 @@ class BuildTests(unittest.TestCase):
         for n in ('mobs/mob1005.gif', 'mobs/mob2476.gif', 'mobs/mob1002.gif', 'items/item1002.gif'): self.assertTrue(os.path.exists(f'{self.t}/out/{n}'), n)
         self.assertFalse(os.path.exists(f'{self.t}/out/items/item1005.gif')); self.assertIn('mobs: 3 images', out)
 
+    def test_classes_csv_overrides_size(self):
+        gif(f'{self.t}/src/501.gif'); gif(f'{self.t}/src/900.gif'); gif(f'{self.t}/src/901.gif', size=(60, 80)); gif(f'{self.t}/src/902.gif', size=(60, 80)); gif(f'{self.t}/src/Sub/501.gif', size=(96, 124))
+        Path(f'{self.t}/classes.csv').write_text('id,file,verdict\n501,501.gif,item\n501,Sub/501.gif,monster\n900,900.gif,monster\n901,901.gif,item\n902,902.gif,unsure\n')
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err): self.run_build('--classes', f'{self.t}/classes.csv')
+        o = lambda n: os.path.exists(f'{self.t}/out/{n}')
+        self.assertTrue(o('items/item501.gif') and o('mobs/mob501.gif') and o('mobs/mob900.gif') and o('items/item901.gif'))   # a 24x24 monster and a big item follow the verdict
+        self.assertFalse(o('items/item900.gif') or o('mobs/mob902.gif') or o('items/item902.gif'))
+        self.assertIn('skipped as unsure', err.getvalue()); self.assertIn('902\t902.gif\tunsure', Path(f'{self.t}/out/unsure.txt').read_text())
+
+    def test_files_missing_from_the_classes_csv_are_skipped_not_guessed(self):
+        gif(f'{self.t}/src/501.gif'); gif(f'{self.t}/src/502.gif'); Path(f'{self.t}/classes.csv').write_text('id,file,verdict\n501,501.gif,item\n')
+        with contextlib.redirect_stderr(io.StringIO()): self.run_build('--classes', f'{self.t}/classes.csv')
+        self.assertFalse(os.path.exists(f'{self.t}/out/items/item502.gif')); self.assertIn('not in the classes file', Path(f'{self.t}/out/unsure.txt').read_text())
+
     def test_wanted_reports_missing(self):
         gif(f'{self.t}/src/501.gif')
         Path(f'{self.t}/want.csv').write_text('item_id,name\n501,A\n502,B\n503,C\n')

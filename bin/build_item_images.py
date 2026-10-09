@@ -10,6 +10,8 @@ Output (default <data folder>/images/):
   each folder has manifest.csv saying which file each image came from. Items and monsters share IDs, hence the prefixes.
 Cards share one picture: a source file named Card.gif is copied to items/card.gif, and with --cards-from (a rAthena db/ folder, for example
 rathena/db/pre-re) every item of type Card counts as covered by it instead of being listed as missing.
+--classes takes the CSV from classify_images.py: each image file goes where its verdict says (item to items/, monster to mobs/) instead of by size alone.
+Files judged "unsure" are skipped and listed in unsure.txt; edit the verdict column of the CSV to settle them and run again.
 --aliases takes a CSV (item_id, image) from list_wanted_items.py for icons filed under another name; they fill ids that have no icon of their own.
 --wanted takes a CSV with an item_id column (for example notes/item-images.csv) and reports which of those items still have no image.
 Mobs can share an ID with an item, so mob images go in their own folder as mob<ID>.gif."""
@@ -34,7 +36,7 @@ def candidates(source):
                 with Image.open(p) as im: size, frames = im.size, getattr(im, 'n_frames', 1)
             except Exception: continue   # unreadable image: skip
             depth = len(p.relative_to(source).parts) - 1
-            out.setdefault(int(m.group(1)), []).append({'path': p, 'ext': m.group(3).lower(), 'suffix': bool(m.group(2)), 'depth': depth, 'size': size, 'frames': frames})
+            out.setdefault(int(m.group(1)), []).append({'path': p, 'rel': p.relative_to(source).as_posix().lower(), 'ext': m.group(3).lower(), 'suffix': bool(m.group(2)), 'depth': depth, 'size': size, 'frames': frames})
     return out
 
 def rank(c): return (c['size'] != ICON, c['ext'] != 'gif', c['suffix'], c['depth'], str(c['path']))
@@ -87,6 +89,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--source', action='append', required=True, help='folder to search (repeat)')
     ap.add_argument('--out', default=f'{ROOT}/images', help='collection root: items/ and mobs/ go under it')
+    ap.add_argument('--classes', help='CSV from classify_images.py (file, verdict)')
     ap.add_argument('--aliases', help='CSV of item_id,image for icons filed under another name')
     ap.add_argument('--wanted'); ap.add_argument('--cards-from', action='append', default=[], help='rAthena db folder (repeat for pre-re and re); items of type Card are covered by items/card.gif')
     ap.add_argument('--dry-run', action='store_true')
@@ -99,11 +102,25 @@ def main(argv=None):
         for i, cs in candidates(Path(src)).items(): found.setdefault(i, []).extend(cs)
     if not found: die('no <id>.gif or <id>.png images found in the source folders')
     out = {'items': [], 'mobs': []}
+    verdicts = {}
+    if a.classes:
+        with open(a.classes, encoding='utf-8', newline='') as f: verdicts = {r['file'].lower(): r['verdict'] for r in csv.DictReader(f)}
+    unsure = []
     for i in sorted(found):
-        icons = [c for c in found[i] if c['size'] == ICON]
-        others = [c for c in found[i] if c['size'] != ICON]
+        if verdicts:
+            kinds = {'item': [], 'monster': []}
+            for c in found[i]:
+                v = verdicts.get(c['rel'])
+                if v in kinds: kinds[v].append(c)
+                else: unsure.append(f'{i}\t{c["rel"]}\t{v or "not in the classes file"}')
+            icons, others = kinds['item'], kinds['monster']
+        else:
+            icons = [c for c in found[i] if c['size'] == ICON]; others = [c for c in found[i] if c['size'] != ICON]
         if icons: out['items'].append((i, choose(icons), 'item'))
         if others: out['mobs'].append((i, choose(others), 'mob'))
+    if unsure:
+        print(f'{len(unsure)} image(s) skipped as unsure (see unsure.txt):', file=sys.stderr)
+        if not a.dry_run: os.makedirs(a.out, exist_ok=True); (Path(a.out) / 'unsure.txt').write_text('\n'.join(unsure) + '\n', encoding='utf-8')
     if a.aliases:
         from PIL import Image
         have_ids = {i for i, _, _ in out['items']}
