@@ -76,6 +76,16 @@ class UaroRules(unittest.TestCase):
         self.assertEqual(bq.uaro_status(1, 't', [N('npc/re/quests/juno.txt'), N('npc/re/quests/other.txt')], r), ('unknown', ''))   # also handled elsewhere
         self.assertEqual(bq.uaro_status(1, 't', [N('npc/re/events/x.txt')], r)[0], 'no'); self.assertEqual(bq.uaro_status(1, 't', [], r)[0], 'unknown')
 
+    def test_yes_rules_need_one_npc_no_rules_need_all(self):
+        r = self.rules('scope,value,status,note\nfile,npc/a.txt,yes,present\nfile,npc/b.txt,no,absent\n'); N = UaroRules.NPC
+        self.assertEqual(bq.uaro_status(1, 't', [N('npc/a.txt'), N('npc/c.txt')], r), ('yes', 'present'))      # one NPC in a "yes" file is enough
+        self.assertEqual(bq.uaro_status(2, 't', [N('npc/b.txt'), N('npc/c.txt')], r), ('unknown', ''))         # a "no" file must cover every NPC
+        self.assertEqual(bq.uaro_status(3, 't', [N('npc/b.txt')], r), ('no', 'absent'))
+        self.assertEqual(bq.uaro_status(4, 't', [N('npc/a.txt'), N('npc/b.txt')], r)[0], 'yes')                # first matching rule wins
+
+    def test_status_must_be_yes_or_no(self):
+        with self.assertRaises(SystemExit): self.rules('scope,value,status,note\nquest,5,maybe,x\n')
+
     def test_quest_range_and_title_rules(self):
         r = self.rules('scope,value,note\nquest,5,one\nrange,10-20,span\ntitle,Subjugation,by name\n')
         self.assertEqual(bq.uaro_status(5, 'x', [], r), ('no', 'one')); self.assertEqual(bq.uaro_status(20, 'x', [], r), ('no', 'span')); self.assertEqual(bq.uaro_status(21, 'x', [], r)[0], 'unknown')

@@ -5,9 +5,9 @@ Sources (all read from the data folder, nothing is downloaded here):
   client file   pages/downloads/OngoingQuests.lub  title, description and summary of ~11,000 quests (ROenglishRE translation)
   quest_db      rathena/db/{pre-re,re}/quest_db.yml  title, time limit, kill targets, item drop targets
   NPC scripts   rathena/npc/**  the quest ids an NPC sets/checks/completes, the items it takes (delitem, countitem) and gives (getitem)
---uaro CSV (default notes/quest-uaro.csv) marks quests that are not on uaRO. Columns: scope,value,note. Scopes: file (an NPC script path, or a folder
-ending in /), quest (an id), range (ids a-b), title (text in the title). A quest from scripts is marked not-uaRO when every NPC that handles
-it is in marked files; id, range and title rules mark it directly. Unmarked quests are "unknown" (nobody has said they are on uaRO).
+--uaro CSV (default notes/quest-uaro.csv) records what is and is not on uaRO. Columns: scope,value,status,note (status yes or no, default no). Scopes: file (an NPC script path, or a folder
+ending in /), quest (an id), range (ids a-b), title (text in the title). A quest from scripts is marked "no" when every NPC that handles
+it is in the marked files, and "yes" when any of them is; id, range and title rules mark it directly. The first matching rule wins, so put exceptions first. Unmarked quests are "unknown".
 Script facts are heuristic: an item is attached to the nearest quest id mentioned before it in the same NPC (or the first one after it),
 and every item carries the NPC, map and file it came from so it can be checked. Items given as variables or expressions are skipped."""
 import argparse, json, os, re, sys
@@ -149,18 +149,22 @@ def load_uaro_rules(path):
     with open(path, encoding='utf-8', newline='') as f: rules = [r for r in csv.DictReader(f) if (r.get('scope') or '').strip() and not r['scope'].startswith('#')]
     for r in rules:
         if r['scope'] not in ('file', 'quest', 'range', 'title'): die(f'{path}: unknown scope {r["scope"]!r} (use file, quest, range or title)')
+        r['status'] = (r.get('status') or 'no').strip().lower()
+        if r['status'] not in ('yes', 'no'): die(f'{path}: status must be yes or no, not {r["status"]!r}')
     return rules
 
 def uaro_status(qid, title, npcs, rules):
-    """('no', rule note) when a rule says the quest is not on uaRO, else ('unknown', '')."""
+    """('yes' or 'no', rule note) from the first rule that matches the quest, else ('unknown', '')."""
     for r in rules:
         v, scope = r['value'].strip(), r['scope']
-        if scope == 'quest' and str(qid) == v: return 'no', r.get('note', '')
+        if scope == 'quest' and str(qid) == v: return r['status'], r.get('note', '')
         if scope == 'range':
             lo, _, hi = v.partition('-')
-            if lo.isdigit() and hi.isdigit() and int(lo) <= qid <= int(hi): return 'no', r.get('note', '')
-        if scope == 'title' and v.lower() in title.lower(): return 'no', r.get('note', '')
-        if scope == 'file' and npcs and all(n['file'] == v or (v.endswith('/') and n['file'].startswith(v)) for n in npcs): return 'no', r.get('note', '')
+            if lo.isdigit() and hi.isdigit() and int(lo) <= qid <= int(hi): return r['status'], r.get('note', '')
+        if scope == 'title' and v.lower() in title.lower(): return r['status'], r.get('note', '')
+        if scope == 'file' and npcs:
+            hit = [n['file'] == v or (v.endswith('/') and n['file'].startswith(v)) for n in npcs]
+            if (r['status'] == 'yes' and any(hit)) or (r['status'] == 'no' and all(hit)): return r['status'], r.get('note', '')
     return 'unknown', ''
 
 def main(argv=None):
@@ -182,10 +186,10 @@ def main(argv=None):
             title = (c or {}).get('title') or next((dbs[m][i]['title'] for m in ('re', 'pre-re') if i in dbs[m]), '')
             status, why = uaro_status(i, title, s['npcs'], rules)
             row = {'id': i, 'title': title, 'uaro': status, 'uaro_note': why, 'client': c, 'db': {m: dbs[m][i] for m in dbs if i in dbs[m]}, 'npcs': s['npcs'], 'items': s['items']}
-            f.write(json.dumps(row, ensure_ascii=False) + '\n'); marked += status == 'no'
+            f.write(json.dumps(row, ensure_ascii=False) + '\n'); marked += status != 'unknown'
     os.replace(tmp, a.out)
     asked = sum(1 for i in ids if any(x['relation'] in ('takes', 'checks') for x in scripts.get(i, {}).get('items', [])))
-    print(f'{len(ids)} quests ({marked} marked not on uaRO) -> {a.out}: {len(client)} with client text, {len(dbs["pre-re"])} pre-re / {len(dbs["re"])} re in quest_db, {len(scripts)} found in NPC scripts, {asked} asking for items')
+    print(f'{len(ids)} quests ({marked} marked yes/no for uaRO) -> {a.out}: {len(client)} with client text, {len(dbs["pre-re"])} pre-re / {len(dbs["re"])} re in quest_db, {len(scripts)} found in NPC scripts, {asked} asking for items')
     return 0
 
 if __name__ == '__main__':
