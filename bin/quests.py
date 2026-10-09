@@ -4,6 +4,7 @@
   quests.py --item <id | name>         quests that ask for the item (add --gives for quests that reward it)
   quests.py --mob <name | part>        quests with a kill target or item drop from that monster
   quests.py --stats                    what the index contains
+Add --uaro to any lookup to hide quests marked as not on uaRO (rules live in notes/quest-uaro.csv; see build_quests.py).
 Item facts come from NPC scripts and are heuristic (see build_quests.py): check the NPC and file shown before relying on one."""
 import json, os, sys
 from pathlib import Path
@@ -32,7 +33,7 @@ def given(q):
     return list(out.values())
 
 def show(q):
-    print(f"Quest {q['id']}: {q['title']}")
+    print(f"Quest {q['id']}: {q['title']}" + (f"   [not on uaRO: {q['uaro_note']}]" if q.get('uaro') == 'no' else ''))
     c = q.get('client')
     if c:
         for l in c['description']: print('   ', l)
@@ -50,16 +51,18 @@ def show(q):
 def main(argv=None):
     a = list(sys.argv[1:] if argv is None else argv)
     if not a: die('usage: quests.py <id|title> | --item <id|name> [--gives] | --mob <name> | --stats')
-    rows = load()
+    rows = load(); only = '--uaro' in a; a = [x for x in a if x != '--uaro']
+    if only: rows = [r for r in rows if r.get('uaro') != 'no']
+    if not a: die('give a quest id, title, --item, --mob or --stats')
     if a == ['--stats']:
-        print(f"{len(rows)} quests: {sum(bool(r['client']) for r in rows)} with client text, {sum(bool(r['db']) for r in rows)} in quest_db, {sum(bool(r['npcs']) for r in rows)} in NPC scripts, {sum(bool(asked(r)) for r in rows)} asking for items, {sum(bool(given(r)) for r in rows)} giving items"); return 0
+        print(f"{len(rows)} quests: {sum(bool(r['client']) for r in rows)} with client text, {sum(bool(r['db']) for r in rows)} in quest_db, {sum(bool(r['npcs']) for r in rows)} in NPC scripts, {sum(bool(asked(r)) for r in rows)} asking for items, {sum(bool(given(r)) for r in rows)} giving items, {sum(r.get('uaro') == 'no' for r in rows)} marked not on uaRO"); return 0
     if a[0] == '--item':
         if len(a) < 2: die('--item needs an item id or name')
         key, gives = a[1].lower(), '--gives' in a
         pick = given if gives else asked
         hits = [(r, g) for r in rows for g in pick(r) if str(g['item']) == key or key in (g['name'] or '').lower()]
         print(f"{len(hits)} quest(s) {'give' if gives else 'ask for'} {a[1]}:")
-        for r, g in hits[:60]: print(f"  {r['id']:>6}  {r['title'][:46]:46} {g['qty'] if g['qty'] is not None else '?'} x {g['name']}  [{g['npc']}]")
+        for r, g in hits[:60]: print(f"  {r['id']:>6}  {r['title'][:46]:46} {g['qty'] if g['qty'] is not None else '?'} x {g['name']}  [{g['npc']}]" + ('  (not on uaRO)' if r.get('uaro') == 'no' else ''))
         if len(hits) > 60: print(f'  ... {len(hits) - 60} more')
         return 0
     if a[0] == '--mob':

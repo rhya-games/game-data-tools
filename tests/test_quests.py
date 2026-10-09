@@ -63,6 +63,28 @@ class Parsing(unittest.TestCase):
         (_, _, ids, _), = bq.parse_script('prt,1,1,1\tscript\tNPC\t1,{\n\tchangequest 5000,5001;\n}\n', {}, {})
         self.assertEqual(ids, [5000, 5001])
 
+class UaroRules(unittest.TestCase):
+    NPC = lambda f: {'name': 'n', 'map': 'm', 'file': f, 'mode': 're'}
+    def rules(self, text):
+        with tempfile.TemporaryDirectory() as t:
+            p = Path(t) / 'r.csv'; p.write_text(text); return bq.load_uaro_rules(str(p))
+
+    def test_file_rule_marks_quests_only_handled_by_those_files(self):
+        r = self.rules('scope,value,note\nfile,npc/re/quests/juno.txt,not here\nfile,npc/re/events/,events folder\n')
+        N = UaroRules.NPC
+        self.assertEqual(bq.uaro_status(1, 't', [N('npc/re/quests/juno.txt')], r), ('no', 'not here'))
+        self.assertEqual(bq.uaro_status(1, 't', [N('npc/re/quests/juno.txt'), N('npc/re/quests/other.txt')], r), ('unknown', ''))   # also handled elsewhere
+        self.assertEqual(bq.uaro_status(1, 't', [N('npc/re/events/x.txt')], r)[0], 'no'); self.assertEqual(bq.uaro_status(1, 't', [], r)[0], 'unknown')
+
+    def test_quest_range_and_title_rules(self):
+        r = self.rules('scope,value,note\nquest,5,one\nrange,10-20,span\ntitle,Subjugation,by name\n')
+        self.assertEqual(bq.uaro_status(5, 'x', [], r), ('no', 'one')); self.assertEqual(bq.uaro_status(20, 'x', [], r), ('no', 'span')); self.assertEqual(bq.uaro_status(21, 'x', [], r)[0], 'unknown')
+        self.assertEqual(bq.uaro_status(99, '[Standby] subjugation-Veins', [], r), ('no', 'by name'))
+
+    def test_bad_scope_is_refused_and_missing_file_means_no_rules(self):
+        with self.assertRaises(SystemExit): self.rules('scope,value,note\nbogus,x,y\n')
+        self.assertEqual(bq.load_uaro_rules('/nonexistent.csv'), [])
+
 class EndToEnd(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); t = self.t = self.tmp.name
@@ -80,6 +102,21 @@ class EndToEnd(unittest.TestCase):
         r = self.rows[1180]; self.assertEqual(r['title'], 'Get Rid of "Bakonawa"'); self.assertEqual(set(r['db']), {'re'})
         self.assertEqual(r['npcs'], [{'name': 'Missing Father', 'map': 'prontera', 'file': 'npc/re/quests/q.txt', 'mode': 're'}])
         self.assertEqual(self.rows[1190]['title'], 'No details'); self.assertEqual(set(self.rows[1190]['db']), {'pre-re', 're'})
+
+    def test_uaro_rules_mark_quests_and_the_cli_can_hide_them(self):
+        rules = f'{self.t}/rules.csv'; Path(rules).write_text('scope,value,note\nfile,npc/re/quests/q.txt,not on uaRO\n'); out = f'{self.t}/index/marked.jsonl'
+        with contextlib.redirect_stdout(io.StringIO()): bq.main(['--client', f'{self.t}/client.lub', '--rathena', f'{self.t}/rathena', '--out', out, '--uaro', rules])
+        rows = {r['id']: r for r in map(json.loads, Path(out).read_text(encoding='utf-8').splitlines())}
+        self.assertEqual((rows[1180]['uaro'], rows[1181]['uaro']), ('no', 'unknown')); self.assertEqual(rows[1180]['uaro_note'], 'not on uaRO')
+        old = q.IDX; q.IDX = out
+        def run(*a):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf): q.main(list(a))
+            return buf.getvalue()
+        try:
+            self.assertIn('(not on uaRO)', run('--item', 'Lost Belongings')); self.assertIn('0 quest(s) ask for', run('--uaro', '--item', 'Lost Belongings'))
+            self.assertIn('[not on uaRO: not on uaRO]', run('1180')); self.assertIn('2 marked not on uaRO', run('--stats'))   # 1190 is handled by the same NPC
+        finally: q.IDX = old
 
     def test_cli_lookups(self):
         old = q.IDX; q.IDX = self.out
