@@ -15,6 +15,10 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/parse_iteminfo.py <id or name>` | Descriptions, slots and view IDs from a client item file (`--view N` for the items using a view ID) |
 | `bin/parse_sprites.py <id or name>` | Look up sprite IDs in saved sprite lists (`--gaps` lists missing headgear view IDs) |
 | `bin/parse_irowiki_item.py <id>` | Parse a saved item page |
+| `bin/classify_images.py` | Say whether each wiki image is an item icon or a monster picture, with the evidence |
+| `bin/list_wanted_items.py` | List the items your wiki and loot sheet need icons for |
+| `bin/build_item_images.py` | Build the `item<ID>.gif` icon collection (and `mob<ID>.gif`) from your image folders |
+| `bin/fetch_item_icons.py` | Download missing item icons from RateMyServer or Divine Pride |
 | `bin/save_page.sh <url>` | Save a page byte-for-byte with a metadata file |
 | `bin/fetch_iteminfo.sh` | Download the client item file (variant and version selectable) |
 | `bin/fetch_sprites.sh` | Save all the ai4rei sprite list pages |
