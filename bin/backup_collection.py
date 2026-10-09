@@ -5,9 +5,22 @@ Default destination: BACKUP_DIR, or <data folder>/../game-data-backups. Each run
 (same names and sizes), writes a .sha256 next to it, and keeps only the newest N archives (default 10). If nothing in images/ or notes/
 changed since the newest archive, it does nothing unless --force. --also copies the new archive (and checksum) to more folders, such as a
 cloud-synced folder or an external drive; a missing folder is reported, not created. The backups are not for git: they hold game images."""
-import argparse, hashlib, os, shutil, sys, tarfile, time
+import argparse, hashlib, os, shutil, subprocess, sys, tarfile, time
 from pathlib import Path
-ROOT = os.environ.get('GAME_DATA', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+def default_root(script=__file__):
+    """GAME_DATA, else the repo this script is in. Inside a linked git worktree that is the main checkout, where images/ and notes/ live
+    (a worktree has its own empty copies)."""
+    if os.environ.get('GAME_DATA'): return os.environ['GAME_DATA']
+    here = Path(script).resolve().parent.parent
+    if (here / '.git').is_file():
+        try:
+            common = subprocess.run(['git', '-C', str(here), 'rev-parse', '--path-format=absolute', '--git-common-dir'], capture_output=True, text=True, check=True).stdout.strip()
+            return str(Path(common).parent)
+        except (OSError, subprocess.CalledProcessError): pass
+    return str(here)
+
+ROOT = default_root()
 PREFIX, FOLDERS = 'game-data-tools-images-notes-', ('images', 'notes')
 
 def die(msg): sys.exit(f'error: {msg}')
@@ -22,7 +35,7 @@ def files(root):
     return out
 
 def archives(dest):
-    return sorted(p for p in Path(dest).glob(f'{PREFIX}*.tar.gz'))
+    return sorted((p for p in Path(dest).glob(f'{PREFIX}*.tar.gz')), key=lambda p: (p.stat().st_mtime, p.name))   # oldest first, by time not name
 
 def newest_change(root):
     return max((Path(root, rel).stat().st_mtime for rel in files(root)), default=0)

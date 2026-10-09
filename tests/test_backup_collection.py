@@ -51,6 +51,30 @@ class BackupTests(unittest.TestCase):
         for f in list(Path(f'{self.t}/data/images').rglob('*.gif')) + [Path(f'{self.t}/data/notes/list.csv')]: f.unlink()
         code, _, _ = self.run_backup(); self.assertIn('nothing to back up', str(code))
 
+    def test_newest_and_oldest_are_judged_by_time_not_by_file_name(self):
+        os.makedirs(self.dest)
+        old, new = Path(self.dest) / f'{b.PREFIX}2026-10-09.tar.gz', Path(self.dest) / f'{b.PREFIX}2026-10-09-134702.tar.gz'   # the older one sorts last by name
+        for p, ts in ((old, 1_000_000_000), (new, 1_500_000_000)): p.write_bytes(b'x'); os.utime(p, (ts, ts))
+        self.assertEqual([p.name for p in b.archives(self.dest)], [old.name, new.name])
+        self.run_backup('--force', '--keep', '1'); self.assertEqual(len(self.made()), 1); self.assertFalse(old.exists() or new.exists())
+
+    def test_a_linked_worktree_uses_the_main_checkout(self):
+        import subprocess
+        main = Path(self.t) / 'main'; (main / 'bin').mkdir(parents=True)
+        git = lambda *a, cwd=main: subprocess.run(['git', *a], cwd=cwd, check=True, capture_output=True)
+        git('init', '-q'); git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x')
+        wt = Path(self.t) / 'wt'; git('worktree', 'add', '-q', str(wt))
+        (wt / 'bin').mkdir(exist_ok=True); (wt / 'bin' / 'backup_collection.py').write_text('')
+        (main / 'bin' / 'backup_collection.py').write_text('')
+        env, old = os.environ.pop('GAME_DATA', None), None
+        try:
+            self.assertEqual(Path(b.default_root(str(wt / 'bin' / 'backup_collection.py'))).resolve(), main.resolve())
+            self.assertEqual(Path(b.default_root(str(main / 'bin' / 'backup_collection.py'))).resolve(), main.resolve())
+            os.environ['GAME_DATA'] = '/custom'; self.assertEqual(b.default_root(str(wt / 'bin' / 'backup_collection.py')), '/custom')
+        finally:
+            os.environ.pop('GAME_DATA', None)
+            if env is not None: os.environ['GAME_DATA'] = env
+
     def test_bad_keep_value_is_refused(self):
         code, _, _ = self.run_backup('--keep', '0'); self.assertIn('--keep', str(code))
 
