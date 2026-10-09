@@ -20,6 +20,8 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/build_item_images.py` | Build the `item<ID>.gif` icon collection (and `mob<ID>.gif`) from your image folders |
 | `bin/fetch_item_icons.py` | Download missing item icons from RateMyServer or Divine Pride |
 | `bin/backup_collection.py` | Back up `images/` and `notes/` into a verified, timestamped archive (keeps the newest 10; `--also` copies elsewhere) |
+| `bin/quests.py <id or title>` | Look up a quest: client text, kill targets, NPCs, the items it asks for and gives (`--item`, `--mob`, `--stats`) |
+| `bin/build_quests.py` | Build the quest index from the client quest list, the emulator quest databases and NPC scripts |
 | `bin/save_page.sh <url>` | Save a page byte-for-byte with a metadata file |
 | `bin/fetch_iteminfo.sh` | Download the client item file (variant and version selectable) |
 | `bin/fetch_sprites.sh` | Save all the ai4rei sprite list pages |
@@ -34,6 +36,10 @@ The compare tools search a `docs/` folder for mentions of the thing you looked u
 4. Sprite lists: `setup.sh` runs `bin/fetch_sprites.sh`, which saves the ai4rei viewlist and all npclist pages (`nn.ai4rei.net/dev/viewlist/` and `nn.ai4rei.net/dev/npclist/?qq=0..N`, about 150 pages and a couple of minutes) and then `bin/parse_sprites.py --index` builds the index. It also saves the dotalux npclist (`dotalux.com/ro/npclist/`) if reachable. The index builders stop with a clear error if a file is missing or nothing parses, and keep the previous index.
 
 Set `GAME_DATA` to keep the data somewhere other than this folder.
+
+## Quests
+
+`setup.sh` downloads the ROenglishRE quest list (`bin/fetch_quest_text.sh`) and runs `bin/build_quests.py`, which merges it with rAthena's quest databases and NPC scripts into `index/quests.jsonl` (about 11,000 quests). Item facts come from the NPC scripts, which are code, so they are heuristic: an item is attached to the nearest quest the NPC mentions, and each one shows the NPC, map and file so you can check it. They describe the official game, not uaRO's own changes.
 
 ## Reading the output
 

@@ -11,6 +11,7 @@ python3 -c 'import yaml' 2>/dev/null || { echo "Install PyYAML first: pip instal
 mkdir -p pages index notes
 export GAME_DATA="$root"
 "$here"/bin/fetch_iteminfo.sh && "$here"/bin/parse_iteminfo.py --index || echo "Skipping the client item index: see README, step 3." >&2
+"$here"/bin/fetch_quest_text.sh && "$here"/bin/build_quests.py || echo "Skipping the quest index: see README." >&2
 [ -f pages/nn.ai4rei.net/dev_viewlist ] || "$here"/bin/fetch_sprites.sh || echo "Could not save the sprite lists: see README, step 4." >&2
 [ -f pages/nn.ai4rei.net/dev_viewlist ] && "$here"/bin/parse_sprites.py --index
 echo "Done."
