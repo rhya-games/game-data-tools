@@ -43,6 +43,19 @@ class BuildTests(unittest.TestCase):
         gif(f'{self.t}/src2/701.gif', size=(40, 40)); png(f'{self.t}/src2/701.png')    # icon-sized beats a bigger gif
         c = b.candidates(Path(f'{self.t}/src2'))[701]; self.assertEqual(b.choose(c)['ext'], 'png')
 
+    def test_monster_pictures_keep_their_original_format(self):
+        png(f'{self.t}/src/1005.png', size=(60, 80)); gif(f'{self.t}/src/1007.gif', size=(40, 40)); png(f'{self.t}/src/616.png')
+        self.run_build()
+        self.assertEqual(Path(f'{self.t}/out/mobs/mob1005.png').read_bytes(), Path(f'{self.t}/src/1005.png').read_bytes())
+        self.assertTrue(os.path.exists(f'{self.t}/out/mobs/mob1007.gif')); self.assertFalse(os.path.exists(f'{self.t}/out/mobs/mob1005.gif'))
+        self.assertTrue(os.path.exists(f'{self.t}/out/items/item616.gif'))   # item PNGs still become GIF
+
+    def test_rebuild_removes_a_mob_file_replaced_by_another_format(self):
+        png(f'{self.t}/src/1005.png', size=(60, 80)); gif(f'{self.t}/out/mobs/mob1005.gif', size=(60, 80))
+        Path(f'{self.t}/out/mobs/manifest.csv').write_text('id,file,source,size,notes\n1005,mob1005.gif,x,60x80,converted from png\n')
+        self.run_build(); self.assertFalse(os.path.exists(f'{self.t}/out/mobs/mob1005.gif')); self.assertTrue(os.path.exists(f'{self.t}/out/mobs/mob1005.png'))
+        self.assertEqual(list(self.manifest('mobs')), [1005])
+
     def test_non_icon_images_are_monster_pictures(self):
         gif(f'{self.t}/src/1005.gif', size=(56, 40)); gif(f'{self.t}/src/2476.gif', size=(237, 188))
         gif(f'{self.t}/src/1002.gif'); gif(f'{self.t}/src/Mobs/1002.gif', size=(30, 30))   # an id used by an item icon and a monster picture

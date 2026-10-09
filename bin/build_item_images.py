@@ -3,10 +3,10 @@
   build_item_images.py --source ~/Projects/uaro-docs/docs/img [--source DIR ...] [--out DIR] [--wanted LIST.csv] [--dry-run]
 Looks for files named <id>.gif / <id>.png (also <id>_1.png and files in sub-folders). When one item has several, it picks the
 icon-sized one (24x24) first, then .gif over .png, then the top-level file over a sub-folder copy. GIFs are copied byte for byte;
-PNGs are converted to GIF with their transparency. Anything that is not 24x24 goes to mobs/ (a monster picture), not items/.
+Item PNGs are converted to GIF with their transparency; monster pictures are copied as they are. Anything that is not 24x24 goes to mobs/ (a monster picture), not items/.
 Output (default <data folder>/images/):
   items/item<ID>.gif     24x24 item icons
-  mobs/mob<ID>.gif       every other image: in the wiki's image folders anything that is not icon-sized is a monster picture
+  mobs/mob<ID>.gif|png   every other image, in its original format (a PNG stays a PNG: GIF would cut it to 256 colours and hard edges)
   each folder has manifest.csv saying which file each image came from. Items and monsters share IDs, hence the prefixes.
 Cards share one picture: a source file named Card.gif is copied to items/card.gif, and with --cards-from (a rAthena db/ folder, for example
 rathena/db/pre-re) every item of type Card counts as covered by it instead of being listed as missing.
@@ -76,10 +76,10 @@ def card_ids(db_dir):
         out |= {d['Id'] for d in yaml.load(Path(f).read_text(encoding='utf-8'), Loader=loader).get('Body', []) if d.get('Type') == 'Card'}
     return out
 
-def write(c, dst, dry):
+def write(c, dst, dry, convert=True):
     """Copy a gif or convert a png; returns (note list)."""
     notes = []
-    if c['ext'] == 'png':
+    if c['ext'] == 'png' and convert:
         notes.append('converted from png')
         if not dry and png_to_gif(c['path'], dst): notes.append('colours reduced to 255')
     elif not dry: shutil.copyfile(c['path'], dst)
@@ -139,10 +139,13 @@ def main(argv=None):
         if not a.dry_run and (folder / 'manifest.csv').exists():
             with open(folder / 'manifest.csv', encoding='utf-8', newline='') as f: old = {r['file']: r for r in csv.DictReader(f)}
         for i, c, prefix in entries:
-            dst = folder / f'{prefix}{i}.gif'
-            rows.append([i, dst.name, str(c['path']), f'{c["size"][0]}x{c["size"][1]}', '; '.join(write(c, dst, a.dry_run) + (['icon filed under another name'] if c.get('alias') else []))])
-        made = {r[1] for r in rows}
-        keep = [[r['id'], r['file'], r['source'], r['size'], r['notes']] for r in old.values() if r['file'] not in made and (folder / r['file']).exists()]
+            dst = folder / f'{prefix}{i}.{c["ext"] if prefix == "mob" else "gif"}'
+            rows.append([i, dst.name, str(c['path']), f'{c["size"][0]}x{c["size"][1]}', '; '.join(write(c, dst, a.dry_run, convert=(prefix != 'mob')) + (['icon filed under another name'] if c.get('alias') else []))])
+        made, made_ids = {r[1] for r in rows}, {str(r[0]) for r in rows}
+        keep = [[r['id'], r['file'], r['source'], r['size'], r['notes']] for r in old.values() if r['file'] not in made and r['id'] not in made_ids and (folder / r['file']).exists()]
+        if not a.dry_run:
+            for r in old.values():
+                if r['id'] in made_ids and r['file'] not in made and (folder / r['file']).exists(): (folder / r['file']).unlink()   # replaced by a file with another extension
         rows += keep   # icons added by other means (downloads) stay in the collection and the manifest
         if not a.dry_run:
             with open(folder / 'manifest.csv', 'w', newline='', encoding='utf-8') as f:
