@@ -8,6 +8,8 @@ Output (default <data folder>/images/):
   items/item<ID>.gif     24x24 item icons
   mobs/mob<ID>.gif       every other image: in the wiki's image folders anything that is not icon-sized is a monster picture
   each folder has manifest.csv saying which file each image came from. Items and monsters share IDs, hence the prefixes.
+Cards share one picture: a source file named Card.gif is copied to items/card.gif, and with --cards-from (a rAthena db/ folder, for example
+rathena/db/pre-re) every item of type Card counts as covered by it instead of being listed as missing.
 --wanted takes a CSV with an item_id column (for example notes/item-images.csv) and reports which of those items still have no image.
 Mobs can share an ID with an item, so mob images go in their own folder as mob<ID>.gif."""
 import argparse, csv, os, re, shutil, sys
@@ -52,6 +54,25 @@ def png_to_gif(src, dst):
         pal.save(dst, format='GIF', transparency=255, optimize=False)
     return reduced
 
+def find_card_icon(sources):
+    """A 24x24 file named Card.gif in the source folders (top level first)."""
+    from PIL import Image
+    hits = sorted((Path(dp) / f for src in sources for dp, _, fn in os.walk(src) for f in fn if f.lower() == 'card.gif'), key=lambda p: len(p.parts))
+    for p in hits:
+        try:
+            with Image.open(p) as im:
+                if im.size == ICON: return p
+        except Exception: continue
+    return None
+
+def card_ids(db_dir):
+    """Ids of every item of type Card in a rAthena db folder (item_db_*.yml)."""
+    import glob, yaml
+    loader = getattr(yaml, 'CSafeLoader', yaml.SafeLoader); out = set()
+    for f in glob.glob(f'{db_dir}/item_db_*.yml'):
+        out |= {d['Id'] for d in yaml.load(Path(f).read_text(encoding='utf-8'), Loader=loader).get('Body', []) if d.get('Type') == 'Card'}
+    return out
+
 def write(c, dst, dry):
     """Copy a gif or convert a png; returns (note list)."""
     notes = []
@@ -65,7 +86,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--source', action='append', required=True, help='folder to search (repeat)')
     ap.add_argument('--out', default=f'{ROOT}/images', help='collection root: items/ and mobs/ go under it')
-    ap.add_argument('--wanted'); ap.add_argument('--dry-run', action='store_true')
+    ap.add_argument('--wanted'); ap.add_argument('--cards-from', action='append', default=[], help='rAthena db folder (repeat for pre-re and re); items of type Card are covered by items/card.gif')
+    ap.add_argument('--dry-run', action='store_true')
     a = ap.parse_args(argv)
     try: import PIL  # noqa: F401
     except ImportError: die('Pillow is required: pip install -r requirements.txt')
@@ -84,19 +106,31 @@ def main(argv=None):
         folder = Path(a.out) / kind
         if not a.dry_run: folder.mkdir(parents=True, exist_ok=True)
         rows = []
+        old = {}
+        if not a.dry_run and (folder / 'manifest.csv').exists():
+            with open(folder / 'manifest.csv', encoding='utf-8', newline='') as f: old = {r['file']: r for r in csv.DictReader(f)}
         for i, c, prefix in entries:
             dst = folder / f'{prefix}{i}.gif'
             rows.append([i, dst.name, str(c['path']), f'{c["size"][0]}x{c["size"][1]}', '; '.join(write(c, dst, a.dry_run))])
+        made = {r[1] for r in rows}
+        keep = [[r['id'], r['file'], r['source'], r['size'], r['notes']] for r in old.values() if r['file'] not in made and (folder / r['file']).exists()]
+        rows += keep   # icons added by other means (downloads) stay in the collection and the manifest
         if not a.dry_run:
             with open(folder / 'manifest.csv', 'w', newline='', encoding='utf-8') as f:
                 w = csv.writer(f); w.writerow(['id', 'file', 'source', 'size', 'notes']); w.writerows(rows)
         conv = sum('converted' in r[4] for r in rows)
         print(f'{kind}: {len(rows)} images' + (' (dry run)' if a.dry_run else f' -> {folder}') + f' ({conv} converted from png)')
+    card = find_card_icon(a.source)
+    if card:
+        if not a.dry_run: shutil.copyfile(card, Path(a.out) / 'items' / 'card.gif')
+        print(f'card.gif: shared card icon from {card}')
     if a.wanted:
         with open(a.wanted, encoding='utf-8') as f: want = [int(r['item_id']) for r in csv.DictReader(f)]
-        have = {i for i, _, _ in out['items']}
-        missing = [i for i in want if i not in have]
-        print(f'wanted {len(want)} item icons: have {len(want) - len(missing)}, missing {len(missing)}')
+        have = {i for i, _, _ in out['items']} | {int(p.name[4:-4]) for p in (Path(a.out) / 'items').glob('item*.gif') if p.name[4:-4].isdigit()}
+        cards = set().union(*(card_ids(d) for d in a.cards_from)) if a.cards_from and card else set()
+        by_card = [i for i in want if i not in have and i in cards]
+        missing = [i for i in want if i not in have and i not in cards]
+        print(f'wanted {len(want)} item icons: have {len(want) - len(missing) - len(by_card)}' + (f', {len(by_card)} cards use card.gif' if by_card else '') + f', missing {len(missing)}')
         if not a.dry_run: (Path(a.out) / 'items' / 'missing.txt').write_text('\n'.join(map(str, missing)) + '\n')
     return 0
 

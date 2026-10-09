@@ -56,6 +56,27 @@ class BuildTests(unittest.TestCase):
         out = self.run_build('--wanted', f'{self.t}/want.csv')
         self.assertIn('have 1, missing 2', out); self.assertEqual(Path(f'{self.t}/out/items/missing.txt').read_text().split(), ['502', '503'])
 
+    def test_rebuilding_keeps_icons_added_by_other_means(self):
+        gif(f'{self.t}/src/501.gif'); self.run_build()
+        gif(f'{self.t}/out/items/item999.gif')                        # an icon added later, e.g. downloaded
+        with open(f'{self.t}/out/items/manifest.csv', 'a', encoding='utf-8') as fh: fh.write('999,item999.gif,https://example/999.gif,24x24,downloaded\n')
+        Path(f'{self.t}/want.csv').write_text('item_id\n501\n999\n1000\n')
+        out = self.run_build('--wanted', f'{self.t}/want.csv')
+        self.assertIn('have 2, missing 1', out); self.assertIn('downloaded', self.manifest('items')[999]['notes']); self.assertEqual(len(self.manifest('items')), 2)
+
+    def test_cards_share_one_icon_and_are_not_missing(self):
+        gif(f'{self.t}/src/Card.gif', color=(10, 20, 30)); gif(f'{self.t}/src/501.gif')
+        Path(f'{self.t}/db').mkdir(); Path(f'{self.t}/db/item_db_etc.yml').write_text('Body:\n  - Id: 4001\n    Type: Card\n  - Id: 4002\n    Type: Card\n  - Id: 901\n    Type: Etc\n')
+        Path(f'{self.t}/want.csv').write_text('item_id\n501\n4001\n4002\n901\n')
+        out = self.run_build('--wanted', f'{self.t}/want.csv', '--cards-from', f'{self.t}/db')
+        self.assertEqual(Path(f'{self.t}/out/items/card.gif').read_bytes(), Path(f'{self.t}/src/Card.gif').read_bytes())
+        self.assertIn('have 1, 2 cards use card.gif, missing 1', out); self.assertEqual(Path(f'{self.t}/out/items/missing.txt').read_text().split(), ['901'])
+
+    def test_cards_are_still_missing_without_a_card_icon(self):
+        gif(f'{self.t}/src/501.gif'); Path(f'{self.t}/db').mkdir(); Path(f'{self.t}/db/item_db_etc.yml').write_text('Body:\n  - Id: 4001\n    Type: Card\n')
+        Path(f'{self.t}/want.csv').write_text('item_id\n4001\n')
+        self.assertIn('missing 1', self.run_build('--wanted', f'{self.t}/want.csv', '--cards-from', f'{self.t}/db'))
+
     def test_dry_run_writes_nothing_and_bad_input_exits(self):
         gif(f'{self.t}/src/501.gif'); self.run_build('--dry-run'); self.assertFalse(os.path.exists(f'{self.t}/out'))
         with self.assertRaises(SystemExit): b.main(['--source', f'{self.t}/missing'])
