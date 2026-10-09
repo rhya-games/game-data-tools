@@ -19,6 +19,7 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/list_wanted_items.py` | List the items your wiki and loot sheet need icons for |
 | `bin/build_item_images.py` | Build the `item<ID>.gif` icon collection (and `mob<ID>.gif`) from your image folders |
 | `bin/fetch_item_icons.py` | Download missing item icons from RateMyServer or Divine Pride |
+| `bin/backup_collection.py` | Back up `images/` and `notes/` into a verified, timestamped archive (keeps the newest 10; `--also` copies elsewhere) |
 | `bin/save_page.sh <url>` | Save a page byte-for-byte with a metadata file |
 | `bin/fetch_iteminfo.sh` | Download the client item file (variant and version selectable) |
 | `bin/fetch_sprites.sh` | Save all the ai4rei sprite list pages |
