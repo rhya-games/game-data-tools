@@ -188,7 +188,59 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
+  },
+  {
+   "id": "uaro-ahat-s-secret",
+   "name": "Ahat's Secret",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [
+    {
+     "item": "Sapha Certificate",
+     "qty": 6
+    }
+   ],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Inspector Doha",
+   "location": "mid_campin 168/170",
+   "content": "Renewal",
+   "rewards": {
+    "items": [
+     {
+      "item": "Unidentified Relic",
+      "qty": 9
+     }
+    ]
+   },
+   "notes": "Ahat's Secret starts with Inspector Doha (/navi mid_campin 168/170). It costs 6 Certificates, rewards 9 Unidentified Relics, opens Scaraba Hole and unlocks a repeatable daily worth 70,000 base EXP, 30,000 job EXP and 1 Certificate. Note the phrase Shay gives you exactly: you must type it for BK (/navi dic_fild01 231/174) and Shay will not repeat it.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
+  },
+  {
+   "id": "uaro-ahat-s-secret-daily",
+   "name": "Ahat's Secret Daily",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "content": "Renewal",
+   "rewards": {
+    "base_exp": 70000,
+    "job_exp": 30000,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Repeatable daily unlocked by Ahat's Secret.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-aid-berserk-potion",
@@ -334,7 +386,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-alicel-pet-evolution",
@@ -692,7 +745,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-antlers",
@@ -750,7 +804,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-apple-of-archer",
@@ -1522,7 +1577,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-berserk",
@@ -1958,7 +2014,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-bomb",
@@ -2391,7 +2448,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-buster",
@@ -2576,6 +2634,32 @@
     }
    ],
    "is_quest": false
+  },
+  {
+   "id": "uaro-calyon-daily-quest",
+   "name": "Calyon Daily Quest",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Calyon",
+   "location": "dicastes01 223/190",
+   "min_level": 80,
+   "content": "Renewal",
+   "rewards": {
+    "base_exp_min": 4000,
+    "base_exp_max": 82800,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Transport 1 - deliver items. Take a request from a giver in the square, complete it, then report to the matching manager inside Diel. Each pays 1 Certificate plus 4,000 – 82,800 base EXP, rolled per request.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-candle",
@@ -2867,7 +2951,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-chile-shrimp-gratin",
@@ -3611,7 +3696,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-cross-hat",
@@ -4191,7 +4277,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-darkness-helm",
@@ -4231,7 +4318,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-decorative-golden-bell",
@@ -4329,7 +4417,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-deluge",
@@ -4686,7 +4775,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-drooping-cat",
@@ -5036,6 +5126,89 @@
     }
    ],
    "is_quest": true
+  },
+  {
+   "id": "uaro-el-dicastes-getting-there",
+   "name": "El Dicastes: Getting There",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Promotional Staff",
+   "location": "prontera 163/53",
+   "content": "Renewal",
+   "steps": [
+    {
+     "step": 1,
+     "npc": "Promotional Staff",
+     "locations": [
+      "prontera 163/53",
+      "aldebaran 127/138",
+      "geffen 90/67"
+     ],
+     "what": "Ash Vacuum chain. The Geffen staff requires base level 70."
+    },
+    {
+     "step": 2,
+     "npc": "Recruiter for the Brave",
+     "locations": [
+      "prt_castle 83/67"
+     ],
+     "what": "Sends you on to Lighthalzen and the Expedition Camp."
+    },
+    {
+     "step": 3,
+     "npc": "Schwartzvalt Mechanic",
+     "locations": [
+      "mid_camp 197/237"
+     ],
+     "what": "Gives the Ring of the Ancient Wise King after a 1 hour wait."
+    },
+    {
+     "step": 4,
+     "npc": "Guard Aello",
+     "locations": [
+      "mid_campin 93/114"
+     ],
+     "what": "Leads to the Sapha audience."
+    },
+    {
+     "step": 5,
+     "npc": "Inspector Doha",
+     "locations": [
+      "mid_campin 168/170"
+     ],
+     "what": "Required stop. Opens Ahat's Secret."
+    },
+    {
+     "step": 6,
+     "npc": "Guard Captain Avalanche",
+     "locations": [
+      "man_in01 315/52"
+     ],
+     "what": "Authorises your passage. Do not skip him or the city guards turn you away."
+    },
+    {
+     "step": 7,
+     "npc": "Entrance Manager",
+     "locations": [
+      "manuk 321/182"
+     ],
+     "what": "Warps you into the Kamidal Tunnel."
+    }
+   ],
+   "rewards": {
+    "items": [
+     {
+      "item": "Ring of the Ancient Wise King",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "El Dicastes is reached through the Ep 13.2 quest chain. Complete the steps in order.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-elemental-change-earth",
@@ -5806,7 +5979,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-fiber-lock",
@@ -5863,7 +6037,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-finding-the-moving-island-quest-moscovia-dungeon-access",
@@ -6080,7 +6255,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-fish-in-mouth",
@@ -6128,7 +6304,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-fist",
@@ -6255,6 +6432,35 @@
     }
    ],
    "is_quest": true
+  },
+  {
+   "id": "uaro-frede-s-request",
+   "name": "Frede's Request",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [
+    {
+     "item": "Small Bradium",
+     "qty": 30
+    }
+   ],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Frede",
+   "location": "dicastes01 117/262",
+   "min_level": 70,
+   "content": "Renewal",
+   "rewards": {
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 3
+     }
+    ]
+   },
+   "notes": "Frede's Request starts with Frede (/navi dicastes01 117/262, base level 70). Find his six missing friends in Scaraba Hole, then bring Bouy (/navi dic_in01 349/129) 30 Small Bradium (Dolomedes, 75%). After a 2 hour wait, deliver the refined ore to all six again. Pays 3 Certificates.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-freezing-trap",
@@ -6634,7 +6840,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-giant-band-aid",
@@ -6781,7 +6988,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-gladius",
@@ -6883,7 +7091,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-glistening-coat",
@@ -8612,6 +8821,32 @@
    "is_quest": true
   },
   {
+   "id": "uaro-kalipo-daily-quest",
+   "name": "Kalipo Daily Quest",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Kalipo",
+   "location": "dicastes01 175/217",
+   "min_level": 80,
+   "content": "Renewal",
+   "rewards": {
+    "base_exp_min": 4000,
+    "base_exp_max": 82800,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Hunting 2 - kill a target. Take a request from a giver in the square, complete it, then report to the matching manager inside Diel. Each pays 1 Certificate plus 4,000 – 82,800 base EXP, rolled per request.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
+  },
+  {
    "id": "uaro-katana",
    "name": "Katana",
    "categories": [
@@ -8852,7 +9087,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-laertes-hunting-quest",
@@ -9012,6 +9248,32 @@
     "job_exp": 60
    },
    "wiki": "https://wiki.uaro.net/repeatable-quests/"
+  },
+  {
+   "id": "uaro-laponte-daily-quest",
+   "name": "Laponte Daily Quest",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Laponte",
+   "location": "dicastes01 187/230",
+   "min_level": 80,
+   "content": "Renewal",
+   "rewards": {
+    "base_exp_min": 4000,
+    "base_exp_max": 82800,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Hunting 1 - kill a target. Take a request from a giver in the square, complete it, then report to the matching manager inside Diel. Each pays 1 Certificate plus 4,000 – 82,800 base EXP, rolled per request.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-lazy-smokie",
@@ -9443,7 +9705,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-little-isis-pet-evolution",
@@ -9653,7 +9916,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-lucky-soup",
@@ -10328,7 +10592,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-mixed-juice",
@@ -10392,6 +10657,32 @@
     }
    ],
    "is_quest": true
+  },
+  {
+   "id": "uaro-moltuka-daily-quest",
+   "name": "Moltuka Daily Quest",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Moltuka",
+   "location": "dicastes01 211/178",
+   "min_level": 80,
+   "content": "Renewal",
+   "rewards": {
+    "base_exp_min": 4000,
+    "base_exp_max": 82800,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Transport 2 - deliver items. Take a request from a giver in the square, complete it, then report to the matching manager inside Diel. Each pays 1 Certificate plus 4,000 – 82,800 base EXP, rolled per request.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-monica-hunting-quest",
@@ -10521,7 +10812,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-moonlight-flower-pet-evolution",
@@ -10857,7 +11149,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-new-surroundings-quest",
@@ -11114,7 +11407,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-orc-hero-helm",
@@ -11380,7 +11674,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-ph-d-hat",
@@ -11488,7 +11783,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-pisces-crown",
@@ -11818,7 +12114,34 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
+  },
+  {
+   "id": "uaro-pura-daily-quest",
+   "name": "Pura Daily Quest",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Pura",
+   "location": "dicastes01 208/230",
+   "min_level": 80,
+   "content": "Renewal",
+   "rewards": {
+    "base_exp_min": 4000,
+    "base_exp_max": 82800,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Supply 1 - deliver items. Take a request from a giver in the square, complete it, then report to the matching manager inside Diel. Each pays 1 Certificate plus 4,000 – 82,800 base EXP, rolled per request.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
   },
   {
    "id": "uaro-purple-cowboy-hat",
@@ -11859,7 +12182,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-quadrille",
@@ -12006,7 +12330,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-rapier",
@@ -12258,7 +12583,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-rigid-nightmare-terror-pet-evolution",
@@ -12674,7 +13000,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-satanic-bone-helm",
@@ -12721,7 +13048,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-savage-pet-evolution",
@@ -13319,7 +13647,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-slash",
@@ -15041,6 +15370,32 @@
    "is_quest": true
   },
   {
+   "id": "uaro-tragis-daily-quest",
+   "name": "Tragis Daily Quest",
+   "categories": [
+    "El Dicastes Quest"
+   ],
+   "ingredients": [],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Tragis",
+   "location": "dicastes01 225/211",
+   "min_level": 80,
+   "content": "Renewal",
+   "rewards": {
+    "base_exp_min": 4000,
+    "base_exp_max": 82800,
+    "items": [
+     {
+      "item": "Sapha Certificate",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Supply 2 - deliver items. Take a request from a giver in the square, complete it, then report to the matching manager inside Diel. Each pays 1 Certificate plus 4,000 – 82,800 base EXP, rolled per request.",
+   "wiki": "https://wiki.uaro.net/el-dicastes/"
+  },
+  {
    "id": "uaro-trident",
    "name": "Trident",
    "categories": [
@@ -15175,7 +15530,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-tsurugi",
@@ -15374,7 +15730,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-valkyrie-helm",
@@ -15432,7 +15789,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-vegetable-farmer-hunting-quest",
@@ -15703,7 +16061,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-whirlwind",
@@ -15878,7 +16237,8 @@
     ]
    },
    "notes": "Dimonka is inside the Main Office; location is the office entrance",
-   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/",
+   "content": "uaRO"
   },
   {
    "id": "uaro-wild-rose-pet-evolution",

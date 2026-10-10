@@ -46,12 +46,16 @@ def show(q):
         print(f"  quest_db ({mode}): " + ('; '.join(bits) or 'no targets'))
     if q['npcs']: print('  NPCs: ' + '; '.join(f"{n['name']} ({n['map'] or 'global'}, {n['mode']})" for n in q['npcs'][:6]) + (f" +{len(q['npcs']) - 6} more" if len(q['npcs']) > 6 else ''))
     u = q.get('uaro_info') or {}
-    if u.get('min_level') or u.get('max_level'): print(f"  levels: {u.get('min_level', '?')}-{u.get('max_level', '?')}")
-    exp = {k: v for k, v in (u.get('rewards') or {}).items() if type(v) is int}   # not the bool in choose_one   # reward items are listed as 'gives' below
-    if exp: print('  rewards: ' + ', '.join(f"{v:,} {k.replace('_', ' ')}" for k, v in exp.items()) + (f" (for {u['hunt']['rewards_for']} kills)" if u.get('hunt', {}).get('rewards_for') else ''))
+    if u.get('min_level') or u.get('max_level'): print(f"  levels: {u.get('min_level', '?')}-{u['max_level']}" if u.get('max_level') else f"  levels: {u['min_level']}+")
+    exp = {k: v for k, v in (u.get('rewards') or {}).items() if type(v) is int}   # not the bool in choose_one
+    amounts = [f"{exp[k]:,} {k.replace('_', ' ')}" for k in exp if not k.endswith(('_min', '_max'))]
+    amounts += [f"{exp[k + '_min']:,}-{exp[k + '_max']:,} {k.replace('_', ' ')}" for k in sorted({k[:-4] for k in exp if k.endswith('_min') and k[:-4] + '_max' in exp})]
+    if amounts: print('  rewards: ' + ', '.join(amounts) + (f" (for {u['hunt']['rewards_for']} kills)" if u.get('hunt', {}).get('rewards_for') else ''))
     if u.get('zeny'): print(f"  costs: {u['zeny']:,} zeny")
     if (u.get('rewards') or {}).get('choose_one'): print('  rewards: one of the items below, your choice')
     if u.get('hunt'): h = u['hunt']; print(f"  hunt: {'/'.join(map(str, h.get('counts', []))) or '?'} x {h['monster']}" + ('  (map needs a quest to enter)' if h.get('quest_access') else ''))
+    for st in u.get('steps', []): print(f"  step {st['step']}: {st['npc']} ({'; '.join(st['locations'])}) - {st['what']}")
+    if u.get('content'): print('  content type:', u['content'])
     if u.get('notes'): print('  notes:', u['notes'])
     if q.get('wiki'): print('  wiki:', q['wiki'])
     for a in asked(q): print(f"  asks for {a['qty'] if a['qty'] is not None else '?'} x {a['name']} ({a['item']})  [{'+'.join(sorted(a['rel']))}, {a['npc'] or 'uaRO data'}, {a['file']}]")

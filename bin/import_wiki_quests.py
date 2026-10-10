@@ -8,19 +8,19 @@ wiki value is reported as a difference (--overwrite takes the wiki's value inste
 import_loot_sheet.py both stay: a record with a wiki link is a quest, whatever its ingredients say. Re-running changes nothing.
 Pages: repeatable-quests (item turn-in and monster hunting quests), dimonka-headgear-quest (headgear for Poring Coins and loot),
 king-frog-hat (one hat quest written as prose with an item table), expanded-class-weapons (a token recipe and the weapons it
-buys)."""
+buys), el-dicastes (daily givers, two quest chains and the access chain)."""
 import argparse, json, os, re, sys
 from pathlib import Path
 from import_loot_sheet import slug
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = 'https://wiki.uaro.net'
-WIKI_FIELDS = ('npc', 'location', 'min_level', 'max_level', 'zeny', 'rewards', 'hunt', 'notes', 'wiki')
+WIKI_FIELDS = ('npc', 'location', 'min_level', 'max_level', 'zeny', 'content', 'steps', 'rewards', 'hunt', 'notes', 'wiki')
 
 def die(msg): sys.exit(f'error: {msg}')
 
 def norm(s): return re.sub(r'[^a-z0-9]+', '', s.lower())
 
-def clean(cell): return re.sub(r'\s+', ' ', re.sub(r'!\[[^\]]*\]\([^)]*\)|<[^>]+>|\*\*|`', ' ', cell)).strip()
+def clean(cell): return re.sub(r'\s+', ' ', re.sub(r'!\[[^\]]*\]\([^)]*\)|<[^>]+>', ' ', cell).replace('**', '').replace('`', '')).strip()
 
 def num(cell):
     m = re.search(r'\d[\d,]*', cell)
@@ -77,6 +77,11 @@ def img_id(cell):
     m = re.search(r'src="[^"]*?/(\d+)(?:_\d+)?\.(?:gif|png)"', cell)
     return int(m.group(1)) if m else None
 
+def content_type(text):
+    """'uaRO' or 'Renewal' from the page's '**Content type:** [Renewal](...)' line, else None."""
+    m = re.search(r'\*\*Content type:\*\*\s*\[([^\]]+)\]', text)
+    return m.group(1).strip() if m else None
+
 def dimonka_headgear(text, page='dimonka-headgear-quest', read=None):
     """(rows, warnings) from dimonka-headgear-quest.md: one HTML table row per hat, with the materials as 'Name - qty' lines. Dimonka stands
     inside the Main Office; its /navi spot comes from main-office.md (the office entrance, so it is noted as that)."""
@@ -97,6 +102,7 @@ def dimonka_headgear(text, page='dimonka-headgear-quest', read=None):
         aliases = [m.group(1).strip(), m.group(2).strip()] if m else []
         row = {'name': full, 'aliases': aliases, 'npc': 'Dimonka', 'ingredients': ings, 'categories': ['Headgear Quest'], 'wiki': f'{SITE}/{page}/', 'page': page,
                'rewards': {'items': [{k: v for k, v in (('item_id', img_id(tds[0])), ('item', full), ('qty', 1)) if v is not None}]}}
+        if content_type(text): row['content'] = content_type(text)
         if office: row.update(location=f'{office.group(1)} {office.group(2)}/{office.group(3)}', notes="Dimonka is inside the Main Office; location is the office entrance")
         if not ings: warn.append(f'{full}: no materials read'); continue
         warn += bad
@@ -173,7 +179,79 @@ def expanded_class_weapons(text, page='expanded-class-weapons', read=None):
     if frag: row['notes'] = f"{ings[0]['item']}: dropped by {frag.group(1).replace('**', '')} at {frag.group(2)}" + (f' ({mobs} monsters listed on the wiki page)' if mobs else '') + '. The NPCs are not named on the wiki page.'
     return [row], warn
 
-PAGES = {'repeatable-quests': repeatable_quests, 'dimonka-headgear-quest': dimonka_headgear, 'king-frog-hat': king_frog_hat, 'expanded-class-weapons': expanded_class_weapons}
+CERT = 'Sapha Certificate'
+
+def el_dicastes(text, page='el-dicastes', read=None):
+    """(rows, warnings) from el-dicastes.md. Three kinds of quest are read, the rest of the page (shops, enchanting, the relic exchange, the dungeon)
+    is not quests and is left out:
+    - the department dailies table (Giver | Location | Department): one daily quest per giver, level and rewards from the sentences around it;
+    - the 'Quest Chains' paragraphs '**Name** starts with **NPC** (`/navi ...`)': costs, hand-in items and rewards where the sentence says them,
+      the whole paragraph kept as notes, and a repeatable daily when the paragraph says what it is worth;
+    - the 'Getting There' table (Step | NPC - Location | What to do): one record with the steps."""
+    rows, warn = [], []
+    base = {'wiki': f'{SITE}/{page}/', 'page': page, 'categories': ['El Dicastes Quest'], 'aliases': []}
+    if content_type(text): base['content'] = content_type(text)
+    lvl = re.search(r'[Bb]ase level `(\d+)` is required for every repeatable', text)
+    pay = re.search(r'Each pays `(\d+)` Certificates? plus `([\d,]+)`\s*[–-]\s*`([\d,]+)` base EXP', text)
+    para = re.search(r'\*\*Department dailies\.\*\*(.*?)\n\s*\n', text, re.S)
+    dsec = re.search(r'\*\*Department dailies\.\*\*(.*?)(?=^## |\Z)', text, re.S | re.M)   # only the table in this section
+    for _, head, trs in md_tables(dsec.group(1) if dsec else ''):
+        if not {'Giver', 'Location', 'Department'} <= set(head): continue
+        for tr in trs:
+            giver, loc, dept = clean(tr.get('Giver', '')), navi(tr.get('Location', '')), clean(tr.get('Department', ''))
+            if not giver or not loc: warn.append(f'could not read daily giver row {tr}'); continue
+            row = {**base, 'name': f'{giver} Daily Quest', 'npc': giver, 'location': loc, 'ingredients': [],
+                   'notes': f'{dept}.' + (' ' + clean(para.group(1)) if para else '')}
+            if lvl: row['min_level'] = int(lvl.group(1))
+            if pay: row['rewards'] = {'base_exp_min': int(pay.group(2).replace(',', '')), 'base_exp_max': int(pay.group(3).replace(',', '')), 'items': [{'item': CERT, 'qty': int(pay.group(1))}]}
+            rows.append(row)
+    if not any(r['name'].endswith('Daily Quest') for r in rows): warn.append('no department dailies table found')
+    if not pay: warn.append('daily rewards sentence not found; rewards left out of the dailies')
+    if not lvl: warn.append('daily level requirement not found; min_level left out of the dailies')
+    def thing(n, w):   # 'Certificates' -> 'Sapha Certificate', 'Unidentified Relics' -> 'Unidentified Relic'
+        w = w.strip(); w = w[:-1] if w.endswith('s') else w
+        return {'item': CERT if w == 'Certificate' else w, 'qty': int(n.replace(',', ''))}
+    sec = re.search(r'^## Quest Chains\s*$(.*?)(?=^## |\Z)', text, re.S | re.M)
+    chains = 0
+    for p in re.split(r'\n\s*\n', sec.group(1)) if sec else []:
+        m = re.match(r'\s*\*\*([^*]+)\*\*\s+starts with\s+\*\*([^*]+)\*\*\s*\(`/navi\s+(\S+)\s+(\d+)/(\d+)`(?:,\s*base level `(\d+)`)?', p)
+        if not m: continue
+        p = re.sub(r'\s+', ' ', p)                       # the source wraps lines inside a sentence
+        m = re.match(r'\s*\*\*([^*]+)\*\*\s+starts with\s+\*\*([^*]+)\*\*\s*\(`/navi\s+(\S+)\s+(\d+)/(\d+)`(?:,\s*base level `(\d+)`)?', p)
+        chains += 1
+        row = {**base, 'name': m.group(1).strip(), 'npc': m.group(2).strip(), 'location': f'{m.group(3)} {m.group(4)}/{m.group(5)}', 'ingredients': [], 'notes': clean(p)}
+        if m.group(6): row['min_level'] = int(m.group(6))
+        c = re.search(r'[Ii]t costs `(\d+)` (Certificates?)', p)
+        if c: row['ingredients'].append(thing(c.group(1), c.group(2)))
+        for b in re.finditer(r'bring \*\*([^*]+)\*\*(?: \(`[^`]*`\))? `(\d+)` \*\*([^*]+)\*\*', p):
+            row['ingredients'].append({**thing(b.group(2), b.group(3)), 'note': f'hand in to {b.group(1).strip()}'})
+        gives = [thing(r.group(1), r.group(2)) for r in re.finditer(r'(?:rewards|Pays) `(\d+)` ([A-Z][A-Za-z ]+?)(?=[,.]| and )', p)]
+        if gives: row['rewards'] = {'items': gives}
+        else: warn.append(f"{row['name']}: no reward found in the paragraph (kept in notes)")
+        rows.append(row)
+        d = re.search(r'repeatable daily worth `([\d,]+)` base EXP, `([\d,]+)` job EXP and `(\d+)` Certificates?', p)
+        if d: rows.append({**base, 'name': f"{row['name']} Daily", 'ingredients': [], 'notes': f"Repeatable daily unlocked by {row['name']}.",
+                           'rewards': {'base_exp': int(d.group(1).replace(',', '')), 'job_exp': int(d.group(2).replace(',', '')), 'items': [{'item': CERT, 'qty': int(d.group(3))}]}})
+    if not chains: warn.append("no quest chain paragraph ('**Name** starts with **NPC** (`/navi`...)') found under Quest Chains")
+    gt = re.search(r'^## Getting There\s*$(.*?)(?=^## |\n---\s*\n|\Z)', text, re.S | re.M)
+    steps = []
+    for _, head, trs in md_tables(gt.group(1) if gt else ''):
+        if not {'Step', 'NPC - Location', 'What to do'} <= set(head): continue
+        for tr in trs:
+            where = tr.get('NPC - Location', ''); locs = [f'{a} {b}/{c}' for a, b, c in re.findall(r'/navi\s+(\S+)\s+(\d+)/(\d+)', where)]
+            npc = clean(re.split(r'\s+-\s+`', where)[0])
+            if not npc or not locs or num(tr.get('Step', '')) is None: warn.append(f'could not read access step {tr}'); continue
+            steps.append({'step': num(tr['Step']), 'npc': npc, 'locations': locs, 'what': clean(tr.get('What to do', ''))})
+    if steps:
+        intro = clean(re.split(r'\n\s*\n', gt.group(1).strip())[0])
+        row = {**base, 'name': 'El Dicastes: Getting There', 'ingredients': [], 'npc': steps[0]['npc'], 'location': steps[0]['locations'][0], 'steps': steps, 'notes': intro}
+        ring = re.search(r'Gives the \*\*([^*]+)\*\*', text[text.index('| Step'):] if '| Step' in text else '')
+        if ring: row['rewards'] = {'items': [{'item': ring.group(1).strip(), 'qty': 1}]}
+        rows.append(row)
+    else: warn.append("no 'Getting There' steps table found")
+    return rows, warn
+
+PAGES = {'repeatable-quests': repeatable_quests, 'dimonka-headgear-quest': dimonka_headgear, 'king-frog-hat': king_frog_hat, 'expanded-class-weapons': expanded_class_weapons, 'el-dicastes': el_dicastes}
 
 def ing_key(ings): return frozenset((norm(re.sub(r'\s*\[0\]$', '', i['item'])), i.get('qty')) for i in ings)   # the loot sheet writes 'Kitty Band [0]', the wiki 'Kitty Band'
 

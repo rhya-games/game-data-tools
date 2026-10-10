@@ -87,6 +87,9 @@ class Applying(unittest.TestCase):
         self.assertEqual(self.recs, after); self.assertEqual((rep['changed'], rep['created']), ([], []))
 
 HATS = '''# Dimonka Headgear Quests
+
+**Content type:** [uaRO](whats-different.md#content-tags)
+
 <table>
 <thead>
 <tr>
@@ -122,7 +125,7 @@ class HeadgearPage(unittest.TestCase):
         self.assertEqual(sorted(r), ['Crimson Rose (Scarlet Rose)', 'Glaris Doll Hat [1]', 'Mitra [1]'])
         m = r['Mitra [1]']
         self.assertEqual(m['ingredients'], [{'item': 'Poring Coin', 'qty': 1500, 'item_id': 7539}, {'item': 'Handcuffs', 'qty': 1000, 'item_id': 7345}, {'item': 'Margaretha Sorin Card', 'qty': 1}])
-        self.assertEqual((m['npc'], m['location']), ('Dimonka', 'prontera 134/184')); self.assertEqual(m['rewards'], {'items': [{'item_id': 5747, 'item': 'Mitra [1]', 'qty': 1}]})
+        self.assertEqual((m['npc'], m['location'], m['content']), ('Dimonka', 'prontera 134/184', 'uaRO')); self.assertEqual(m['rewards'], {'items': [{'item_id': 5747, 'item': 'Mitra [1]', 'qty': 1}]})
         self.assertEqual(r['Crimson Rose (Scarlet Rose)']['aliases'], ['Crimson Rose', 'Scarlet Rose']); self.assertEqual(r['Crimson Rose (Scarlet Rose)']['rewards']['items'][0], {'item': 'Crimson Rose (Scarlet Rose)', 'qty': 1})   # no numeric icon, no id
         self.assertEqual(len(warn), 2); self.assertTrue(any('weird line' in x for x in warn) and any('Nothing Hat' in x for x in warn))
         rows, warn = w.dimonka_headgear(HATS, read=lambda n: ''); self.assertNotIn('location', rows[0]); self.assertTrue(any('Main Office' in x for x in warn))
@@ -272,6 +275,111 @@ class TokenPage(unittest.TestCase):
         s = buf.getvalue()
         for want in ('costs: 10,000,000 zeny', 'rewards: one of the items below, your choice', 'asks for 1000 x Expanded Token Fragments', 'gives 1 x Fortified Dagger [2] (35659)'): self.assertIn(want, s)
         self.assertNotIn('choose one', s)   # the choose_one flag is not an EXP amount
+
+DIC = '''# El Dicastes
+
+**Content type:** [Renewal](whats-different.md#content-tags)
+
+## Getting There
+
+El Dicastes is reached through the Ep 13.2 quest chain. Complete the steps in order.
+
+| Step | NPC - Location | What to do |
+|---|---|---|
+| `1` | **Promotional Staff** - `/navi prontera 163/53`, then `/navi geffen 90/67` | Ash Vacuum chain. The Geffen staff requires base level `70`. |
+| `2` | **Schwartzvalt Mechanic** - `/navi mid_camp 197/237` | Gives the **Ring of the Ancient Wise King** after a `1` hour wait. |
+| `x` | **Nobody** | broken row |
+
+Cross the tunnel.
+
+---
+
+## Sapha Certificates
+
+Base level `80` is required for every repeatable
+source.
+
+**Department dailies.** Take a request from a giver, complete it, then report to the manager. Each pays `1` Certificate plus `4,000` \u2013 `82,800` base EXP, rolled per request.
+
+| Giver | Location | Department |
+|---|---|---|
+| **Laponte** | `/navi dicastes01 187/230` | Hunting `1` - kill a target |
+| **Pura** | `/navi dicastes01 208/230` | Supply `1` - deliver items |
+
+---
+
+## Quest Chains
+
+**Ahat's Secret** starts with **Inspector Doha** (`/navi mid_campin 168/170`). It costs `6` Certificates,
+rewards `9` Unidentified Relics, **opens Scaraba Hole** and unlocks a repeatable daily worth `70,000` base EXP,
+`30,000` job EXP and `1` Certificate. Type the phrase.
+
+**Frede's Request** starts with **Frede** (`/navi dicastes01 117/262`, base level `70`). Find his friends, then bring **Bouy** (`/navi dic_in01 349/129`) `30` **Small Bradium** (Dolomedes,
+`75%`). Pays `3` Certificates.
+
+!!! warning "Finish Ahat's Secret First"
+    A paragraph that is not a chain.
+
+---
+
+## Enchanting
+
+| Giver | Location | Department |
+|---|---|---|
+| **Jahbong** | `/navi dic_fild01 228/159` | not a daily |
+'''
+
+class ElDicastes(unittest.TestCase):
+    def rows(self, text=DIC):
+        r, warn = w.el_dicastes(text); return {x['name']: x for x in r}, warn
+
+    def test_dailies(self):
+        r, warn = self.rows(); d = r['Laponte Daily Quest']
+        self.assertEqual((d['npc'], d['location'], d['min_level'], d['content']), ('Laponte', 'dicastes01 187/230', 80, 'Renewal'))
+        self.assertEqual(d['rewards'], {'base_exp_min': 4000, 'base_exp_max': 82800, 'items': [{'item': 'Sapha Certificate', 'qty': 1}]})
+        self.assertTrue(d['notes'].startswith('Hunting 1 - kill a target. Take a request')); self.assertIn('Supply 1', r['Pura Daily Quest']['notes'])
+
+    def test_chains_read_costs_hand_ins_rewards_and_the_daily(self):
+        r, _ = self.rows(); a = r["Ahat's Secret"]
+        self.assertEqual((a['npc'], a['location']), ('Inspector Doha', 'mid_campin 168/170')); self.assertNotIn('min_level', a)
+        self.assertEqual(a['ingredients'], [{'item': 'Sapha Certificate', 'qty': 6}]); self.assertEqual(a['rewards'], {'items': [{'item': 'Unidentified Relic', 'qty': 9}]})
+        self.assertIn('opens Scaraba Hole', a['notes']); self.assertIn('(/navi mid_campin 168/170)', a['notes'])   # no stray spaces where the backticks were
+        self.assertEqual(r["Ahat's Secret Daily"]['rewards'], {'base_exp': 70000, 'job_exp': 30000, 'items': [{'item': 'Sapha Certificate', 'qty': 1}]})   # the sentence wraps across lines in the source
+        f = r["Frede's Request"]; self.assertEqual(f['min_level'], 70)
+        self.assertEqual(f['ingredients'], [{'item': 'Small Bradium', 'qty': 30, 'note': 'hand in to Bouy'}]); self.assertEqual(f['rewards'], {'items': [{'item': 'Sapha Certificate', 'qty': 3}]})
+        self.assertNotIn('Finish Ahat', ''.join(r))
+
+    def test_access_chain_steps(self):
+        r, warn = self.rows(); g = r['El Dicastes: Getting There']
+        self.assertEqual((g['npc'], g['location']), ('Promotional Staff', 'prontera 163/53'))
+        self.assertEqual(g['steps'][0], {'step': 1, 'npc': 'Promotional Staff', 'locations': ['prontera 163/53', 'geffen 90/67'], 'what': 'Ash Vacuum chain. The Geffen staff requires base level 70.'})
+        self.assertEqual(len(g['steps']), 2); self.assertEqual(g['rewards'], {'items': [{'item': 'Ring of the Ancient Wise King', 'qty': 1}]})
+        self.assertEqual(g['notes'], 'El Dicastes is reached through the Ep 13.2 quest chain. Complete the steps in order.')
+        self.assertEqual(len(warn), 1); self.assertIn('Nobody', warn[0])   # the unreadable step row
+
+    def test_other_tables_are_not_quests(self):
+        r, _ = self.rows()   # DIC has a Giver | Location | Department table under Enchanting too; only the one in the dailies section counts
+        self.assertEqual(sorted(r), ["Ahat's Secret", "Ahat's Secret Daily", 'El Dicastes: Getting There', "Frede's Request", 'Laponte Daily Quest', 'Pura Daily Quest'])
+
+    def test_lookup_shows_steps_ranges_and_open_ended_levels(self):
+        r, _ = w.el_dicastes(DIC); recs = []; w.apply_rows(recs, r)
+        with tempfile.TemporaryDirectory() as t:
+            Path(f'{t}/d.json').write_text(json.dumps({'quests': recs})); Path(f'{t}/q.jsonl').write_text('\n'.join(json.dumps(x) for x in bq.uaro_rows(f'{t}/d.json')) + '\n')
+            old = q.IDX; q.IDX = f'{t}/q.jsonl'; buf = io.StringIO()
+            try:
+                with contextlib.redirect_stdout(buf): q.main(['Getting There']); q.main(['Laponte Daily']); q.main(["Ahat's Secret Daily"])
+            finally: q.IDX = old
+        s = buf.getvalue()
+        for want in ('step 1: Promotional Staff (prontera 163/53; geffen 90/67) - Ash Vacuum chain.', 'step 2: Schwartzvalt Mechanic (mid_camp 197/237)', 'content type: Renewal', 'levels: 80+', 'rewards: 4,000-82,800 base exp',
+                     'rewards: 70,000 base exp, 30,000 job exp', 'gives 1 x Sapha Certificate'): self.assertIn(want, s)
+        self.assertNotIn('80-?', s)
+
+    def test_missing_parts_warn(self):
+        rows, warn = w.el_dicastes('# El Dicastes\n\nnothing here')
+        self.assertEqual(rows, []); self.assertTrue(any('dailies table' in x for x in warn) and any('quest chain' in x for x in warn) and any('Getting There' in x for x in warn))
+        r, warn = self.rows(DIC.replace('Each pays', 'Pays').replace('Base level', 'Level'))
+        self.assertNotIn('rewards', r['Pura Daily Quest']); self.assertNotIn('min_level', r['Pura Daily Quest'])
+        self.assertTrue(any('rewards sentence' in x for x in warn) and any('level requirement' in x for x in warn))
 
 class Cli(unittest.TestCase):
     def setUp(self):
