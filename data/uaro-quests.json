@@ -175,7 +175,20 @@
      "qty": 50
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 18774,
+      "item": "Advanced Assassin Mask [0]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-aid-berserk-potion",
@@ -308,7 +321,20 @@
      "qty": 3
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5137,
+      "item": "Alice Doll [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-alicel-pet-evolution",
@@ -653,7 +679,20 @@
      "qty": 1500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5377,
+      "item": "Antique Smoking Pipe",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-antlers",
@@ -698,7 +737,20 @@
      "qty": 1500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5490,
+      "item": "Anubis Helm",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-apple-of-archer",
@@ -1457,7 +1509,20 @@
      "qty": 1200
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5416,
+      "item": "Beer Hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-berserk",
@@ -1880,7 +1945,20 @@
      "qty": 10
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5800,
+      "item": "Blush of Groom",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-bomb",
@@ -2300,7 +2378,20 @@
      "qty": 350
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5378,
+      "item": "Bunny Ears Hat (Bunny Top Hat)",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-buster",
@@ -2763,7 +2854,20 @@
      "qty": 1
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5283,
+      "item": "Chick Hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-chile-shrimp-gratin",
@@ -3494,7 +3598,20 @@
      "qty": 10
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5548,
+      "item": "Crimson Rose (Scarlet Rose)",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-cross-hat",
@@ -4061,7 +4178,20 @@
      "qty": 50
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5373,
+      "item": "Dark Randgris Helm [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-darkness-helm",
@@ -4088,7 +4218,20 @@
      "qty": 1500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5653,
+      "item": "Darkness Helm [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-decorative-golden-bell",
@@ -4173,7 +4316,20 @@
      "qty": 1
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5340,
+      "item": "Defolty Doll Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-deluge",
@@ -4517,7 +4673,20 @@
      "qty": 500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5211,
+      "item": "Dress Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-drooping-cat",
@@ -5552,7 +5721,20 @@
      "qty": 1000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5356,
+      "item": "Festival Pumpkin Hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-fiber-lock",
@@ -5596,7 +5778,20 @@
      "qty": 25
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5664,
+      "item": "Filir's Pinions",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-finding-the-moving-island-quest-moscovia-dungeon-access",
@@ -5800,7 +5995,20 @@
      "qty": 700
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5380,
+      "item": "Fish Head hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-fish-in-mouth",
@@ -5835,7 +6043,20 @@
      "qty": 50
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5403,
+      "item": "Fish in Mouth",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-fist",
@@ -6329,7 +6550,19 @@
      "qty": 20
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item": "Gangster Scarf",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-giant-band-aid",
@@ -6463,7 +6696,20 @@
      "qty": 1200
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5374,
+      "item": "Gigantic Majestic Goat (DEF)",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-gladius",
@@ -6552,7 +6798,20 @@
      "qty": 1
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5341,
+      "item": "Glaris Doll Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-glistening-coat",
@@ -8451,7 +8710,20 @@
      "qty": 1200
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5372,
+      "item": "Koneko Hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-laertes-hunting-quest",
@@ -9029,7 +9301,20 @@
      "qty": 50
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5324,
+      "item": "Little Angel Doll",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-little-isis-pet-evolution",
@@ -9226,7 +9511,20 @@
      "qty": 500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 18542,
+      "item": "Love Guard [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-lucky-soup",
@@ -9888,7 +10186,20 @@
      "qty": 1500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5747,
+      "item": "Mitra [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-mixed-juice",
@@ -10068,7 +10379,20 @@
      "qty": 250
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5214,
+      "item": "Moonlight Flower Hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-moonlight-flower-pet-evolution",
@@ -10391,7 +10715,20 @@
      "qty": 1200
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5502,
+      "item": "Necromancer's Hood",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-new-surroundings-quest",
@@ -10635,7 +10972,20 @@
      "qty": 4000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5375,
+      "item": "Orc Hero Headdress [1] (Large Orc Hero Helm [1])",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-orc-hero-helm",
@@ -10888,7 +11238,20 @@
      "qty": 1000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5358,
+      "item": "Pecopeco Wing Ears",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-ph-d-hat",
@@ -10983,7 +11346,20 @@
      "qty": 120
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5305,
+      "item": "Pirate Dagger",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-pisces-crown",
@@ -11300,7 +11676,20 @@
      "qty": 5
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5182,
+      "item": "Puppy Hat",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-purple-cowboy-hat",
@@ -11328,7 +11717,20 @@
      "qty": 300
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5409,
+      "item": "Purple Cowboy Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-quadrille",
@@ -11462,7 +11864,20 @@
      "qty": 500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5463,
+      "item": "Rainbow Scarf",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-rapier",
@@ -11701,7 +12116,20 @@
      "qty": 2000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5208,
+      "item": "Rideword Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-rigid-nightmare-terror-pet-evolution",
@@ -12104,7 +12532,20 @@
      "qty": 20
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5381,
+      "item": "Santa Poring Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-satanic-bone-helm",
@@ -12138,7 +12579,20 @@
      "qty": 2000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5529,
+      "item": "Satanic Bone Helm [1] (Devil's Bone Helm [1])",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-savage-pet-evolution",
@@ -12723,7 +13177,20 @@
      "qty": 200
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 18539,
+      "item": "Skull Cap [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-slash",
@@ -14566,7 +15033,20 @@
      "qty": 250
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5307,
+      "item": "Tropical Fruit Hat [1] (Carmen Miranda's Hat [1])",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-tsurugi",
@@ -14752,7 +15232,20 @@
      "qty": 500
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 18505,
+      "item": "Umbala Spirit",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-valkyrie-helm",
@@ -14797,7 +15290,20 @@
      "qty": 1000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5289,
+      "item": "Vanilmirth Hat [0]",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-vegetable-farmer-hunting-quest",
@@ -15055,7 +15561,20 @@
      "qty": 450
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5574,
+      "item": "Well-Chewed Pencil",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-whirlwind",
@@ -15217,7 +15736,20 @@
      "qty": 1000
     }
    ],
-   "is_quest": true
+   "is_quest": true,
+   "npc": "Dimonka",
+   "location": "prontera 134/184",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5360,
+      "item": "Wickebine's Black Cat Ears",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Dimonka is inside the Main Office; location is the office entrance",
+   "wiki": "https://wiki.uaro.net/dimonka-headgear-quest/"
   },
   {
    "id": "uaro-wild-rose-pet-evolution",
