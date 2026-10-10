@@ -6,7 +6,8 @@ brackets ignored; listed so you can check), else by its ingredient list (item na
 left alone. Matched records only get the fields they lack: a field you set by hand (or an earlier run set) is never overwritten, and a different
 wiki value is reported as a difference (--overwrite takes the wiki's value instead). Records that came from the wiki and a re-run of
 import_loot_sheet.py both stay: a record with a wiki link is a quest, whatever its ingredients say. Re-running changes nothing.
-Pages: repeatable-quests (item turn-in and monster hunting quests), dimonka-headgear-quest (headgear for Poring Coins and loot)."""
+Pages: repeatable-quests (item turn-in and monster hunting quests), dimonka-headgear-quest (headgear for Poring Coins and loot),
+king-frog-hat (one hat quest written as prose with an item table)."""
 import argparse, json, os, re, sys
 from pathlib import Path
 from import_loot_sheet import slug
@@ -101,7 +102,41 @@ def dimonka_headgear(text, page='dimonka-headgear-quest', read=None):
         rows.append(row)
     return rows, warn
 
-PAGES = {'repeatable-quests': repeatable_quests, 'dimonka-headgear-quest': dimonka_headgear}
+def md_img_id(cell):
+    """The item id in a markdown image ![x](img/5447.gif) of a table cell, else None."""
+    m = re.search(r'!\[[^\]]*\]\([^)]*?/(\d+)(?:_\d+)?\.(?:gif|png)\)', cell)
+    return int(m.group(1)) if m else None
+
+def king_frog_hat(text, page='king-frog-hat', read=None):
+    """(rows, warnings) from king-frog-hat.md: a prose page for one quest. The title names the quest, the first bold name before a /navi spot is the
+    NPC, the table with Item and Quantity columns holds the materials, and 'reward you with **Item**' names the item given."""
+    warn = []
+    t = re.search(r'^#\s+(.+)$', text, re.M)
+    if not t: return [], ['no title found']
+    title = re.sub(r'^[^\w\[(]+', '', t.group(1)).strip()          # drops the emoji
+    m = re.search(r'\*\*([^*\n]+)\*\*[^\n`]*?`/navi\s+(\S+)\s+(\d+)/(\d+)`', text)
+    ings = []
+    for _, head, trs in md_tables(text):
+        if 'Item' not in head or 'Quantity' not in head: continue
+        for tr in trs:
+            name, qty = clean(tr.get('Item', '')), num(tr.get('Quantity', ''))
+            if not name or qty is None: warn.append(f'{title}: could not read material row {tr}'); continue
+            ing = {'item': name, 'qty': qty}; iid = md_img_id(tr.get('Item', ''))
+            if iid: ing['item_id'] = iid
+            ings.append(ing)
+    if not ings: return [], warn + [f'{title}: no materials table found']
+    row = {'name': title, 'aliases': [], 'ingredients': ings, 'categories': ['Headgear Quest'], 'wiki': f'{SITE}/{page}/', 'page': page}
+    if title.endswith(' Quest'): row['aliases'].append(title[:-len(' Quest')])
+    if m: row.update(npc=m.group(1).strip(), location=f'{m.group(2)} {m.group(3)}/{m.group(4)}')
+    else: warn.append(f'{title}: no NPC and /navi spot found')
+    r = re.search(r'reward you with\s+(?:the\s+)?(!\[[^\]]*\]\([^)]*\))?\s*\*\*([^*]+)\*\*', text)
+    if r:
+        row['aliases'].append(r.group(2).strip())
+        row['rewards'] = {'items': [{k: v for k, v in (('item_id', md_img_id(r.group(1) or '')), ('item', r.group(2).strip()), ('qty', 1)) if v is not None}]}
+    else: warn.append(f'{title}: no reward item found')
+    return [row], warn
+
+PAGES = {'repeatable-quests': repeatable_quests, 'dimonka-headgear-quest': dimonka_headgear, 'king-frog-hat': king_frog_hat}
 
 def ing_key(ings): return frozenset((norm(re.sub(r'\s*\[0\]$', '', i['item'])), i.get('qty')) for i in ings)   # the loot sheet writes 'Kitty Band [0]', the wiki 'Kitty Band'
 

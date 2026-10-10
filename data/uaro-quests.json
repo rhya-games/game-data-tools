@@ -8597,6 +8597,63 @@
    "is_quest": true
   },
   {
+   "id": "uaro-king-frog-hat-quest",
+   "name": "King Frog Hat Quest",
+   "categories": [
+    "Headgear Quest"
+   ],
+   "ingredients": [
+    {
+     "item_id": 5447,
+     "item": "Frog Hat",
+     "qty": 1
+    },
+    {
+     "item_id": 722,
+     "item": "Pearl",
+     "qty": 100
+    },
+    {
+     "item_id": 7155,
+     "item": "Poisonous Toad Skin",
+     "qty": 200
+    },
+    {
+     "item_id": 938,
+     "item": "Sticky Mucus",
+     "qty": 200
+    },
+    {
+     "item_id": 969,
+     "item": "Gold",
+     "qty": 1
+    },
+    {
+     "item_id": 2249,
+     "item": "Coronet",
+     "qty": 1
+    },
+    {
+     "item": "Poisonous Toad Card",
+     "qty": 1
+    }
+   ],
+   "is_quest": true,
+   "source": "wiki",
+   "npc": "Mysterious Boy",
+   "location": "beach_dun3 213/99",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 5528,
+      "item": "King Frog Hat [1]",
+      "qty": 1
+     }
+    ]
+   },
+   "wiki": "https://wiki.uaro.net/king-frog-hat/"
+  },
+  {
    "id": "uaro-kirby-hunting-quest",
    "name": "Kirby Hunting Quest",
    "categories": [

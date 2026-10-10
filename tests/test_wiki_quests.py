@@ -169,6 +169,43 @@ class HeadgearPage(unittest.TestCase):
             self.assertIn('repeatable-quests.md not found', buf.getvalue()); self.assertIn('Mitra [1]', Path(f'{t}/d.json').read_text())
             with self.assertRaises(SystemExit): w.main(['--wiki', f'{t}/wiki', '--data', f'{t}/d.json', '--page', 'repeatable-quests'])
 
+FROG = '''# 🐸 King Frog Hat Quest
+
+A **Mysterious Boy** has appeared, offering to help you craft the ![Frog Hat](img/5528.gif) **King Frog Hat [1]**! You can find him at: `/navi beach_dun3 213/99`.
+
+| **Item**                                 | **Quantity** |
+|------------------------------------------|--------------|
+| ![Frog Hat](img/5447.gif) **Frog Hat**   | x1           |
+| ![Pearl](img/722.png) **Pearl**          | x100         |
+| ![Card](img/card-1.gif) **Poisonous Toad Card** | x1    |
+| **Broken** | lots |
+
+| Item | Where to farm |
+|---|---|
+| Pearl | Clam |
+
+Once you present the items, he will reward you with the ![Frog Hat](img/5528.gif) **King Frog Hat [1]**.
+'''
+
+class ProsePage(unittest.TestCase):
+    def test_row(self):
+        rows, warn = w.king_frog_hat(FROG); r = rows[0]
+        self.assertEqual(r['name'], 'King Frog Hat Quest'); self.assertEqual(r['aliases'], ['King Frog Hat', 'King Frog Hat [1]'])
+        self.assertEqual((r['npc'], r['location']), ('Mysterious Boy', 'beach_dun3 213/99'))
+        self.assertEqual(r['ingredients'], [{'item': 'Frog Hat', 'qty': 1, 'item_id': 5447}, {'item': 'Pearl', 'qty': 100, 'item_id': 722}, {'item': 'Poisonous Toad Card', 'qty': 1}])
+        self.assertEqual(r['rewards'], {'items': [{'item_id': 5528, 'item': 'King Frog Hat [1]', 'qty': 1}]}); self.assertEqual(len(warn), 1); self.assertIn('Broken', warn[0])
+
+    def test_incomplete_pages_warn(self):
+        self.assertEqual(w.king_frog_hat('no title here'), ([], ['no title found']))
+        rows, warn = w.king_frog_hat('# Hat Quest\n\nNo table.'); self.assertEqual(rows, []); self.assertIn('no materials table', warn[0])
+        rows, warn = w.king_frog_hat(FROG.replace('reward you with', 'give you').replace('`/navi beach_dun3 213/99`', 'the cave'))
+        self.assertEqual([x for x in warn if 'Broken' not in x], ['King Frog Hat Quest: no NPC and /navi spot found', 'King Frog Hat Quest: no reward item found']); self.assertNotIn('npc', rows[0])
+
+    def test_matches_an_existing_record_by_its_reward_or_becomes_new(self):
+        rows, _ = w.king_frog_hat(FROG); recs = [rec('King Frog Hat', [('Pearl', 100)])]; rep = w.apply_rows(recs, rows)
+        self.assertEqual(rep['by_name'], ['King Frog Hat Quest -> King Frog Hat'])   # the title minus ' Quest' is the record's name; self.assertEqual(recs[0]['npc'], 'Mysterious Boy'); self.assertEqual(len(rep['ingredient_diffs']), 1)
+        recs = []; rep = w.apply_rows(recs, rows); self.assertEqual((rep['created'], recs[0]['id'], recs[0]['source']), (['King Frog Hat Quest'], 'uaro-king-frog-hat-quest', 'wiki'))
+
 class Cli(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.t = self.tmp.name; Path(f'{self.t}/wiki').mkdir(); Path(f'{self.t}/wiki/repeatable-quests.md').write_text(PAGE)
