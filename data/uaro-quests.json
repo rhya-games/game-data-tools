@@ -13086,55 +13086,6 @@
    "is_quest": true
   },
   {
-   "id": "uaro-scatelon-pet",
-   "name": "Scatelon Pet",
-   "categories": [
-    "Event Quest",
-    "Pet"
-   ],
-   "ingredients": [
-    {
-     "item": "Skelion Bone Fragment",
-     "qty": 120
-    },
-    {
-     "item": "Halloween Coin",
-     "qty": 300
-    },
-    {
-     "item": "Deviling Coin",
-     "qty": 100
-    },
-    {
-     "item": "Black Soul",
-     "qty": 250
-    },
-    {
-     "item": "Captured Soul",
-     "qty": 25
-    },
-    {
-     "item": "Pumpkin Cake",
-     "qty": 200
-    }
-   ],
-   "is_quest": true,
-   "source": "wiki",
-   "npc": "Old Sage of Bones",
-   "location": "alberta 218/30",
-   "zeny": 500000,
-   "rewards": {
-    "items": [
-     {
-      "item": "Scatelon Crate",
-      "qty": 1
-     }
-    ]
-   },
-   "notes": "Halloween Event 2025, which has ended (the wiki keeps the page for reference). Needs the Halloween main quest done on one character; one Scatelon Crate per account. The crate contains the Scatelon pet. Added by hand from halloween-event-2025.md, not by import_wiki_quests.py.",
-   "wiki": "https://wiki.uaro.net/halloween-event-2025/"
-  },
-  {
    "id": "uaro-schweizersabel",
    "name": "Schweizersabel",
    "categories": [
