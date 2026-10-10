@@ -5528,6 +5528,78 @@
    "is_quest": true
   },
   {
+   "id": "uaro-expanded-class-weapons",
+   "name": "Expanded Class Weapons",
+   "categories": [
+    "Weapon Quest"
+   ],
+   "ingredients": [
+    {
+     "item": "Expanded Token Fragments",
+     "qty": 1000
+    }
+   ],
+   "is_quest": true,
+   "source": "wiki",
+   "location": "prt_in 90/72",
+   "zeny": 10000000,
+   "rewards": {
+    "items": [
+     {
+      "item_id": 32303,
+      "item": "Bolt Revolver [2]",
+      "qty": 1,
+      "class": "Gunslinger"
+     },
+     {
+      "item_id": 28240,
+      "item": "King Cobra [2]",
+      "qty": 1,
+      "class": "Gunslinger"
+     },
+     {
+      "item_id": 13192,
+      "item": "Death Fire [2]",
+      "qty": 1,
+      "class": "Gunslinger"
+     },
+     {
+      "item_id": 28226,
+      "item": "Avenger [2]",
+      "qty": 1,
+      "class": "Gunslinger"
+     },
+     {
+      "item_id": 35658,
+      "item": "Bolt Revolver [2]",
+      "qty": 1,
+      "class": "Gunslinger"
+     },
+     {
+      "item_id": 35659,
+      "item": "Fortified Dagger [2]",
+      "qty": 1,
+      "class": "Ninja"
+     },
+     {
+      "item_id": 13338,
+      "item": "Illusion Wing Shuriken [2]",
+      "qty": 1,
+      "class": "Ninja"
+     },
+     {
+      "item_id": 28717,
+      "item": "Valkyrie Knife [4]",
+      "qty": 1,
+      "class": "Super Novice"
+     }
+    ],
+    "choose_one": true
+   },
+   "notes": "Expanded Token Fragments: dropped by monsters included in Elite-tier Hunting Mission quests at 3% (38 monsters listed on the wiki page). The NPCs are not named on the wiki page.",
+   "wiki": "https://wiki.uaro.net/expanded-class-weapons/"
+  },
+  {
    "id": "uaro-exploding-dragon",
    "name": "Exploding Dragon",
    "categories": [

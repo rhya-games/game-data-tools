@@ -47,8 +47,10 @@ def show(q):
     if q['npcs']: print('  NPCs: ' + '; '.join(f"{n['name']} ({n['map'] or 'global'}, {n['mode']})" for n in q['npcs'][:6]) + (f" +{len(q['npcs']) - 6} more" if len(q['npcs']) > 6 else ''))
     u = q.get('uaro_info') or {}
     if u.get('min_level') or u.get('max_level'): print(f"  levels: {u.get('min_level', '?')}-{u.get('max_level', '?')}")
-    exp = {k: v for k, v in (u.get('rewards') or {}).items() if isinstance(v, int)}   # reward items are listed as 'gives' below
+    exp = {k: v for k, v in (u.get('rewards') or {}).items() if type(v) is int}   # not the bool in choose_one   # reward items are listed as 'gives' below
     if exp: print('  rewards: ' + ', '.join(f"{v:,} {k.replace('_', ' ')}" for k, v in exp.items()) + (f" (for {u['hunt']['rewards_for']} kills)" if u.get('hunt', {}).get('rewards_for') else ''))
+    if u.get('zeny'): print(f"  costs: {u['zeny']:,} zeny")
+    if (u.get('rewards') or {}).get('choose_one'): print('  rewards: one of the items below, your choice')
     if u.get('hunt'): h = u['hunt']; print(f"  hunt: {'/'.join(map(str, h.get('counts', []))) or '?'} x {h['monster']}" + ('  (map needs a quest to enter)' if h.get('quest_access') else ''))
     if u.get('notes'): print('  notes:', u['notes'])
     if q.get('wiki'): print('  wiki:', q['wiki'])

@@ -206,6 +206,73 @@ class ProsePage(unittest.TestCase):
         self.assertEqual(rep['by_name'], ['King Frog Hat Quest -> King Frog Hat'])   # the title minus ' Quest' is the record's name; self.assertEqual(recs[0]['npc'], 'Mysterious Boy'); self.assertEqual(len(rep['ingredient_diffs']), 1)
         recs = []; rep = w.apply_rows(recs, rows); self.assertEqual((rep['created'], recs[0]['id'], recs[0]['source']), (['King Frog Hat Quest'], 'uaro-king-frog-hat-quest', 'wiki'))
 
+ECW = '''# Expanded Class Weapons
+
+### Gunslinger
+
+| Weapon | In-game command |
+|--------|-----------------|
+|![32303](img/E/32303.gif) Bolt Revolver [2] | @ii 32303 |
+|![35658](img/E/830001.png) Bolt Revolver [2] | @ii 35658 |
+
+### Ninja
+
+| Weapon | In-game command |
+|--------|-----------------|
+|![35659](img/E/510053.png) Fortified Dagger [2] | @ii 35659 |
+| Broken | none |
+
+| Weapon | Class |
+|---|---|
+| Some Weapon | Any |
+
+### Token Creation Requirements
+
+To create a token, you must combine:
+
+- **1000 × Expanded Token Fragments**
+- **10,000,000 Zeny**
+
+## Expanded Token Fragments
+
+- Dropped by monsters included in **Elite-tier Hunting Mission quests**
+- **Drop Rate:** 3%
+
+### NPC Location
+
+All NPCs are in the eastern room (`/navi prt_in 90/72`)
+
+- Acidus (@mi 1713)
+- Draco (@mi 2013)
+'''
+
+class TokenPage(unittest.TestCase):
+    def test_row(self):
+        rows, warn = w.expanded_class_weapons(ECW); r = rows[0]
+        self.assertEqual((r['name'], r['zeny'], r['location']), ('Expanded Class Weapons', 10000000, 'prt_in 90/72')); self.assertNotIn('npc', r)
+        self.assertEqual(r['ingredients'], [{'item': 'Expanded Token Fragments', 'qty': 1000}])
+        self.assertEqual(r['rewards']['items'], [{'item_id': 32303, 'item': 'Bolt Revolver [2]', 'qty': 1, 'class': 'Gunslinger'}, {'item_id': 35658, 'item': 'Bolt Revolver [2]', 'qty': 1, 'class': 'Gunslinger'}, {'item_id': 35659, 'item': 'Fortified Dagger [2]', 'qty': 1, 'class': 'Ninja'}])
+        self.assertTrue(r['rewards']['choose_one']); self.assertEqual(len(warn), 1); self.assertIn('Broken', warn[0])
+        self.assertIn('dropped by monsters included in Elite-tier Hunting Mission quests at 3% (2 monsters listed', r['notes'])
+
+    def test_incomplete_pages(self):
+        self.assertEqual(w.expanded_class_weapons('x'), ([], ['no title found']))
+        rows, warn = w.expanded_class_weapons('# T\n\nnothing'); self.assertEqual(rows, []); self.assertIn('no token requirements', warn[-1])
+        rows, warn = w.expanded_class_weapons(ECW.replace('Token Creation Requirements', 'Other').replace('NPC Location', 'Elsewhere'))
+        self.assertEqual(rows, [])
+
+    def test_shows_cost_choice_and_items_without_calling_a_flag_exp(self):
+        rows, _ = w.expanded_class_weapons(ECW); recs = []; w.apply_rows(recs, rows)
+        with tempfile.TemporaryDirectory() as t:
+            Path(f'{t}/d.json').write_text(json.dumps({'quests': recs})); out = bq.uaro_rows(f'{t}/d.json')[0]
+            Path(f'{t}/q.jsonl').write_text(json.dumps(out) + '\n'); old = q.IDX; q.IDX = f'{t}/q.jsonl'; buf = io.StringIO()
+            try:
+                with contextlib.redirect_stdout(buf): q.main(['Expanded Class'])
+            finally: q.IDX = old
+        s = buf.getvalue()
+        for want in ('costs: 10,000,000 zeny', 'rewards: one of the items below, your choice', 'asks for 1000 x Expanded Token Fragments', 'gives 1 x Fortified Dagger [2] (35659)'): self.assertIn(want, s)
+        self.assertNotIn('choose one', s)   # the choose_one flag is not an EXP amount
+
 class Cli(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.t = self.tmp.name; Path(f'{self.t}/wiki').mkdir(); Path(f'{self.t}/wiki/repeatable-quests.md').write_text(PAGE)

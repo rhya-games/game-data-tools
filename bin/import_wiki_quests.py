@@ -7,13 +7,14 @@ left alone. Matched records only get the fields they lack: a field you set by ha
 wiki value is reported as a difference (--overwrite takes the wiki's value instead). Records that came from the wiki and a re-run of
 import_loot_sheet.py both stay: a record with a wiki link is a quest, whatever its ingredients say. Re-running changes nothing.
 Pages: repeatable-quests (item turn-in and monster hunting quests), dimonka-headgear-quest (headgear for Poring Coins and loot),
-king-frog-hat (one hat quest written as prose with an item table)."""
+king-frog-hat (one hat quest written as prose with an item table), expanded-class-weapons (a token recipe and the weapons it
+buys)."""
 import argparse, json, os, re, sys
 from pathlib import Path
 from import_loot_sheet import slug
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = 'https://wiki.uaro.net'
-WIKI_FIELDS = ('npc', 'location', 'min_level', 'max_level', 'rewards', 'hunt', 'notes', 'wiki')
+WIKI_FIELDS = ('npc', 'location', 'min_level', 'max_level', 'zeny', 'rewards', 'hunt', 'notes', 'wiki')
 
 def die(msg): sys.exit(f'error: {msg}')
 
@@ -136,7 +137,43 @@ def king_frog_hat(text, page='king-frog-hat', read=None):
     else: warn.append(f'{title}: no reward item found')
     return [row], warn
 
-PAGES = {'repeatable-quests': repeatable_quests, 'dimonka-headgear-quest': dimonka_headgear, 'king-frog-hat': king_frog_hat}
+def expanded_class_weapons(text, page='expanded-class-weapons', read=None):
+    """(rows, warnings) from expanded-class-weapons.md: one quest. Weapon tables under a class heading ('| Weapon | In-game command |', '@ii 32303')
+    are what it gives (choose one); the bullets under 'Token Creation Requirements' are the cost (items and zeny); the first /navi spot after
+    'NPC Location' is where the NPCs are (the page does not name them); the fragment drop is kept as a note."""
+    warn = []
+    t = re.search(r'^#\s+(.+)$', text, re.M)
+    if not t: return [], ['no title found']
+    title = re.sub(r'^[^\w\[(]+', '', t.group(1)).strip()
+    weapons = []
+    for heading, head, trs in md_tables(text):
+        if 'Weapon' not in head or 'In-game command' not in head: continue
+        for tr in trs:
+            name, iid = clean(tr.get('Weapon', '')), num(tr.get('In-game command', ''))
+            if not name or iid is None: warn.append(f'{heading}: could not read weapon row {tr}'); continue
+            weapons.append({'item_id': iid, 'item': name, 'qty': 1, 'class': clean(heading)})
+    sec = re.search(r'Token Creation Requirements(.*?)(?:\n#|\Z)', text, re.S)
+    ings, zeny = [], None
+    for line in (sec.group(1) if sec else '').splitlines():
+        m = re.match(r'^\s*-\s+\*\*([\d,]+)\s*(?:[×x]\s*)?(.+?)\*\*', line)
+        if not m: continue
+        n, what = int(m.group(1).replace(',', '')), m.group(2).strip()
+        if what.lower() == 'zeny': zeny = n
+        else: ings.append({'item': what, 'qty': n})
+    if not weapons: warn.append(f'{title}: no weapon tables found')
+    if not ings: return [], warn + [f'{title}: no token requirements found']
+    row = {'name': title, 'aliases': [], 'ingredients': ings, 'categories': ['Weapon Quest'], 'wiki': f'{SITE}/{page}/', 'page': page}
+    if zeny is not None: row['zeny'] = zeny
+    if weapons: row['rewards'] = {'items': weapons, 'choose_one': True}
+    loc = re.search(r'NPC Location(.*?)`/navi\s+(\S+)\s+(\d+)/(\d+)`', text, re.S)
+    if loc: row['location'] = f'{loc.group(2)} {loc.group(3)}/{loc.group(4)}'
+    else: warn.append(f'{title}: no NPC /navi spot found')
+    frag = re.search(r'Dropped by ([^\n]+?)\s*\n.*?Drop Rate:\*\*\s*([\d.]+%)', text, re.S)
+    mobs = len(re.findall(r'^- .+\(@mi \d+\)', text, re.M))
+    if frag: row['notes'] = f"{ings[0]['item']}: dropped by {frag.group(1).replace('**', '')} at {frag.group(2)}" + (f' ({mobs} monsters listed on the wiki page)' if mobs else '') + '. The NPCs are not named on the wiki page.'
+    return [row], warn
+
+PAGES = {'repeatable-quests': repeatable_quests, 'dimonka-headgear-quest': dimonka_headgear, 'king-frog-hat': king_frog_hat, 'expanded-class-weapons': expanded_class_weapons}
 
 def ing_key(ings): return frozenset((norm(re.sub(r'\s*\[0\]$', '', i['item'])), i.get('qty')) for i in ings)   # the loot sheet writes 'Kitty Band [0]', the wiki 'Kitty Band'
 
