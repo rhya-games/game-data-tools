@@ -3811,6 +3811,34 @@
    "is_quest": true
   },
   {
+   "id": "uaro-crusader-job-quest",
+   "name": "Crusader Job Quest",
+   "categories": [
+    "Job Quest",
+    "Pet",
+    "Pet Evolution"
+   ],
+   "ingredients": [
+    {
+     "item_id": 1004,
+     "item": "Chivalry Emblem",
+     "qty": 1,
+     "note": "Senior Crusader in Prontera Castle; both together skip the item test"
+    },
+    {
+     "item_id": 1009,
+     "item": "Hand of God",
+     "qty": 1,
+     "note": "Senior Crusader in Prontera Castle; both together skip the item test"
+    }
+   ],
+   "is_quest": false,
+   "source": "emulator",
+   "npc": "Senior Crusader (Michael Halig)",
+   "location": "prt_castle 45/169",
+   "notes": "Job change to Crusader (Hercules npc/jobs/2-2/crusader.txt). Handing in 1 Chivalry Emblem and 1 Hand of God goes straight to the next test with Moorenak Miyol (prt_cas 238/94). Without them the NPC sets a random test instead: 10 each of one of three sets of 4 items (957/959/1099/901, 932/1043/1098/1094, 958/930/1041/1062). Those items are not recorded yet."
+  },
+  {
    "id": "uaro-crystal-blue",
    "name": "Crystal Blue",
    "categories": [
@@ -8821,6 +8849,43 @@
    "is_quest": true
   },
   {
+   "id": "uaro-juperos-core-entrance-quest",
+   "name": "Juperos Core Entrance Quest",
+   "categories": [
+    "Dungeon Quest"
+   ],
+   "ingredients": [
+    {
+     "item_id": 7356,
+     "item": "Crest Piece",
+     "qty": 1,
+     "note": "All four pieces fit the elevator lever, and are used up when it is pulled"
+    },
+    {
+     "item_id": 7357,
+     "item": "Crest Piece",
+     "qty": 1,
+     "note": "All four pieces fit the elevator lever, and are used up when it is pulled"
+    },
+    {
+     "item_id": 7358,
+     "item": "Crest Piece",
+     "qty": 1,
+     "note": "All four pieces fit the elevator lever, and are used up when it is pulled"
+    },
+    {
+     "item_id": 7359,
+     "item": "Crest Piece",
+     "qty": 1,
+     "note": "All four pieces fit the elevator lever, and are used up when it is pulled"
+    }
+   ],
+   "is_quest": true,
+   "source": "emulator",
+   "location": "jupe_ele_r 51/98",
+   "notes": "Lever (Switch#ufe) in the Juperos elevator reception room, next to four slots. With one of each Crest Piece (7356-7359, all named Crest Piece in game) you can insert them all; pulling the lever then covers the slots and starts the elevator (Hercules npc/quests/quests_juperos.txt). Before that, each Juperos checkpoint hole (jupe_area1 and jupe_area2, #hole#1-1 to 2-4) needs one specific piece, which is handed back. Each piece drops from one Venatu (VENATU_1 to 4, 3-5%). Not unique to uaRO."
+  },
+  {
    "id": "uaro-kalipo-daily-quest",
    "name": "Kalipo Daily Quest",
    "categories": [
@@ -11474,6 +11539,39 @@
     }
    ],
    "is_quest": true
+  },
+  {
+   "id": "uaro-orc-trophy",
+   "name": "Orc Trophy",
+   "categories": [
+    "Pet"
+   ],
+   "ingredients": [
+    {
+     "item_id": 1004,
+     "item": "Chivalry Emblem",
+     "qty": 1
+    },
+    {
+     "item_id": 904,
+     "item": "Scorpion Tail",
+     "qty": 1
+    }
+   ],
+   "is_quest": false,
+   "source": "emulator",
+   "npc": "Monster Tamer (Shogo)",
+   "location": "izlude_in 129/64",
+   "rewards": {
+    "items": [
+     {
+      "item_id": 635,
+      "item": "Orc Trophy",
+      "qty": 1
+     }
+    ]
+   },
+   "notes": "Orc Warrior taming item. The Monster Tamer in Izlude (speaks as Shogo) trades 1 Chivalry Emblem and 1 Scorpion Tail for 1 Orc Trophy. Not unique to uaRO: it is in the emulator script (Hercules npc/quests/monstertamers.txt), and the maintainer confirmed it is there on uaRO. Same NPC also makes Book of the Devil (1 Old Magic Book + 2 Horrendous Mouth) and No Recipient (1 Old Portrait)."
   },
   {
    "id": "uaro-oridecon",
