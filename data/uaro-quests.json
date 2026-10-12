@@ -3814,9 +3814,13 @@
    "id": "uaro-crusader-job-quest",
    "name": "Crusader Job Quest",
    "categories": [
+    "Cooking",
     "Job Quest",
+    "Official Hat Quest",
+    "Other Quest",
     "Pet",
-    "Pet Evolution"
+    "Pet Evolution",
+    "Skills"
    ],
    "ingredients": [
     {
@@ -3826,17 +3830,89 @@
      "note": "Senior Crusader in Prontera Castle; both together skip the item test"
     },
     {
+     "item_id": 901,
+     "item": "Daenggie",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 957,
+     "item": "Decayed Nail",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
      "item_id": 1009,
      "item": "Hand of God",
      "qty": 1,
      "note": "Senior Crusader in Prontera Castle; both together skip the item test"
+    },
+    {
+     "item_id": 958,
+     "item": "Horrendous Mouth",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 1062,
+     "item": "Jack o' Pumpkin",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 1041,
+     "item": "Lantern",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 1098,
+     "item": "Manacles",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 1043,
+     "item": "Orc Claw",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 930,
+     "item": "Rotten Bandage",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 1094,
+     "item": "Short Daenggie",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 932,
+     "item": "Skel-Bone",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 959,
+     "item": "Stinky Scale",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
+    },
+    {
+     "item_id": 1099,
+     "item": "Worn-out Prison Uniform",
+     "qty": 10,
+     "note": "Random test: 10 each of 4 items, one of three sets"
     }
    ],
-   "is_quest": false,
+   "is_quest": true,
    "source": "emulator",
    "npc": "Senior Crusader (Michael Halig)",
    "location": "prt_castle 45/169",
-   "notes": "Job change to Crusader (Hercules npc/jobs/2-2/crusader.txt). Handing in 1 Chivalry Emblem and 1 Hand of God goes straight to the next test with Moorenak Miyol (prt_cas 238/94). Without them the NPC sets a random test instead: 10 each of one of three sets of 4 items (957/959/1099/901, 932/1043/1098/1094, 958/930/1041/1062). Those items are not recorded yet."
+   "notes": "Job change to Crusader (Hercules npc/jobs/2-2/crusader.txt). Handing the Senior Crusader 1 Chivalry Emblem and 1 Hand of God goes straight to the next test with Moorenak Miyol (prt_cas 238/94). Without them he sets one random test: 10 each of one of three sets of 4 items (Decayed Nail, Stinky Scale, Worn-out Prison Uniform, Daenggie / Skel-Bone, Orc Claw, Manacles, Short Daenggie / Horrendous Mouth, Rotten Bandage, Lantern, Jack o' Pumpkin). Not unique to uaRO."
   },
   {
    "id": "uaro-crystal-blue",
