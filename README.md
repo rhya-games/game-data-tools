@@ -20,6 +20,7 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/build_item_images.py` | Build the `item<ID>.gif` icon collection (and `mob<ID>.gif`) from your image folders |
 | `bin/fetch_class_sprites.py` | Download the first, second and transcendent class sprites (male + female) from iRO Wiki to `images/classes/` |
 | `bin/fetch_item_icons.py` | Download missing item icons from RateMyServer or Divine Pride |
+| `bin/fetch_mob_sprites.py` | Download missing monster pictures (animated GIF) from RateMyServer, then Divine Pride, for ids you give, the monsters a wiki mentions (`--wiki`) or the Endless Tower spawns (`--endless-tower`) |
 | `bin/backup_collection.py` | Back up `images/` and `notes/` into a verified, timestamped archive (keeps the newest 10; `--also` copies elsewhere) |
 | `bin/quests.py <id or title>` | Look up a quest: client text, kill targets, NPCs, the items it asks for and gives (`--item`, `--mob`, `--stats`) |
 | `bin/build_quests.py` | Build the quest index from the client quest list, the emulator quest databases and NPC scripts |
