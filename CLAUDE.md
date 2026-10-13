@@ -35,6 +35,16 @@ An agent starts cold, so it can't rely on this conversation:
 
 `notes/` is git-ignored and `bin/backup_collection.py` backs it up, so handoffs survive between sessions.
 
+## uaRO server rates
+
+The emulator databases hold base iRO rates; uaRO runs boosted ones (defined on the wiki, `docs/server-info.md`). Apply them before comparing a database value with the wiki or the loot sheet:
+
+- Item drops x5, capped at 100% (normal cards x5, so 0.01% becomes 0.05%).
+- MvP drop x3. MvP and mini-boss cards x1 (0.01%).
+- Basic rates are listed as x5 / x5 / x5 and weekends as x7.5 / x7.5 / x5; the page doesn't label the three, but the FAQ confirms drops are x5 and the weekend list keeps the last one at x5. Quest EXP x2, x5 for select quests.
+
+Check `docs/server-info.md` for changes before relying on these numbers. Say which multiplier you applied in every drop comparison.
+
 ## Rules that apply everywhere
 
 - Use the classic class names (Whitesmith, Creator, Professor, Clown, Star Gladiator).
