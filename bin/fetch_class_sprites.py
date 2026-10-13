@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download the player class sprites (male + female pair) for first, second and transcendent classes from iRO Wiki.
+"""Download the player class sprites (male + female pair) for novice, first, second and transcendent classes from iRO Wiki.
   fetch_class_sprites.py            download missing sprites to images/classes/<Class>.png and write images/classes/manifest.csv
   fetch_class_sprites.py --force    download again even when the file exists
 Files are saved as the wiki serves them (transparent PNG, 118x111, male and female side by side; Bard, Clown, Kagerou
@@ -15,7 +15,7 @@ UA = {'User-Agent': 'Mozilla/5.0'}
 
 # (tier, class name, wiki file name)
 CLASSES = [(t, n, w or n) for t, items in {
-    'first': [('Swordman', ''), ('Mage', ''), ('Archer', ''), ('Acolyte', ''), ('Merchant', ''), ('Thief', ''),
+    'first': [('Novice', ''), ('Super Novice', ''), ('Swordman', ''), ('Mage', ''), ('Archer', ''), ('Acolyte', ''), ('Merchant', ''), ('Thief', ''),
               ('Taekwon Kid', 'TaeKwon Kid'), ('Gunslinger', ''), ('Ninja', '')],
     'second': [('Knight', ''), ('Priest', ''), ('Wizard', ''), ('Blacksmith', ''), ('Hunter', ''), ('Assassin', ''),
                ('Crusader', ''), ('Monk', ''), ('Sage', ''), ('Rogue', ''), ('Alchemist', ''), ('Bard', ''),
