@@ -21,6 +21,7 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/fetch_class_sprites.py` | Download the novice, first, second and transcendent class sprites (male + female) from iRO Wiki to `images/classes/` |
 | `bin/fetch_item_icons.py` | Download missing item icons from RateMyServer or Divine Pride |
 | `bin/fetch_mob_sprites.py` | Download missing monster pictures (animated GIF) from RateMyServer, then Divine Pride, for ids you give, the monsters a wiki mentions (`--wiki`) or the Endless Tower spawns (`--endless-tower`) |
+| `bin/fetch_rms_quests.py <ids>` | Find the RateMyServer quest page that makes (or uses) each item, from the item's RateMyServer page; writes `index/rms-quests.json` (official iRO quests only) |
 | `bin/repo_changes.py` | Report what changed in uaro-docs, uaro-loot-sheet and this repo since the last baseline, the follow-ups each change implies, and ids with no picture (`--ack` moves the baseline) |
 | `bin/backup_collection.py` | Back up `images/` and `notes/` into a verified, timestamped archive (keeps the newest 10; `--also` copies elsewhere) |
 | `bin/quests.py <id or title>` | Look up a quest: client text, kill targets, NPCs, the items it asks for and gives (`--item`, `--mob`, `--stats`) |
