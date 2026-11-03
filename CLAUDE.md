@@ -49,5 +49,5 @@ Check `docs/server-info.md` for changes before relying on these numbers. Say whi
 
 - Use the classic class names (Whitesmith, Creator, Professor, Clown, Star Gladiator).
 - Event content (event items, event quests) stays out of the loot sheet and `data/uaro-quests.json`.
-- Work on a branch and merge on approval; no PRs here. Commit as `rhya`, with no Co-Authored-By line.
+- Work on a branch and merge on approval; no PRs here. Commit as `Rhya`, with no Co-Authored-By line.
 - Don't push, deploy or merge in any of the repos unless asked.
