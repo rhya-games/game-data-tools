@@ -51,3 +51,13 @@ Check `docs/server-info.md` for changes before relying on these numbers. Say whi
 - Event content (event items, event quests) stays out of the loot sheet and `data/uaro-quests.json`.
 - Work on a branch and merge on approval; no PRs here. Commit as `Rhya`, with no Co-Authored-By line.
 - Don't push, deploy or merge in any of the repos unless asked.
+
+## Sprite cleanup (bin/sprite_clean.py)
+
+The ai4rei viewlist sprites and the item icons store white as transparent (palette entry 0), so white inside the art shows as holes. `sprite_clean.py` restores it and every tool that shows these images should use it (hat-tracker does).
+
+- The rule is a guess: transparent pixels connected to the border stay clear; an enclosed gap becomes white unless it is 12+ pixels and ringed by dark pixels (a hood's face hole). It fails for outline art whose white interior leaks to the outside, and for gaps that should stay open.
+- Fix those with an entry in `data/sprite-fixes.json` (keys documented in the script), with a `note` naming the hat. Prefer the narrowest key (`pixels`, `flood`, `min_fill`) over `holes`, `white` or `solid`; `solid` changed a sprite's shape and had to be reverted.
+- Look before you fix: `sprite_clean.py --grid ID` shows the sprite at high zoom with x/y coordinates, original and cleaned. Every case that took several rounds was guessed at a small zoom. `--sheet IDS` compares on dark and light backdrops.
+- Some source sprites are damaged (Red Ribbon keeps 36 of 684 pixels) or show the wrong side; no cleanup fixes that. Supply your own captured image instead (hat-tracker's `scripts/import_sprite.py`).
+- Rebuild outputs after changing the fixes file; consumers that cache the cleaned PNGs must compare against its modified time.
