@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Official (rAthena renewal) drops for renewal dungeons that uaRO added, with item data.
-  renewal_dungeon_items.py [--area NAME ...] [--out DIR]     build the files
-  renewal_dungeon_items.py --item <id|name|text>             look an item up (drops with 1x and uaRO rates, areas, effects, box contents)
-  renewal_dungeon_items.py --effects                         list every item with a chance-to-drop effect
+"""Official (rAthena renewal) drops for the renewal areas (dungeons, instances and fields) that uaRO added, with item data.
+  renewal_items.py [--area NAME ...] [--out DIR]     build the files
+  renewal_items.py --item <id|name|text>             look an item up (drops with 1x and uaRO rates, areas, effects, box contents)
+  renewal_items.py --effects                         list every item with a chance-to-drop effect
 Areas: the renewal areas on the uaRO wiki's Areas and Instances table (episodes 12-14.2) plus the Niflheim dungeon (nif_dun).
 Mobs come from the rAthena renewal spawn scripts (maps) or instance scripts (monster/areamonster calls);
 drops from re/mob_db.yml; item data from re/item_db_*.yml. Values are official iRO values, not uaRO's.
-Find one item with `renewal_dungeon_items.py --item <id|name>` (reads renewal-dungeon-items.jsonl, which has every item in every area, including all of Endless Tower).', '', 'Each drop shows the official 1x rate and the uaRO rate (item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1).
+Find one item with `renewal_items.py --item <id|name>` (reads renewal-items.jsonl, which has every item in every area, including all of Endless Tower).', '', 'Each drop shows the official 1x rate and the uaRO rate (item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1).
 Also lists box contents, instance script rewards and quest rewards with a hunt target in the area.
-Writes <out>/renewal-dungeon-items.json (by area, complete), .jsonl (one line per item, all areas merged; what --item reads) and .md (summary for people) (default out: $GAME_DATA/notes/handoff).
+Writes <out>/renewal-items.json (by area, complete), .jsonl (one line per item, all areas merged; what --item reads) and .md (summary for people) (default out: $GAME_DATA/notes/handoff).
 """
 import argparse, glob, json, re, sys
 from pathlib import Path
@@ -141,7 +141,7 @@ def lookup(path, q):
     if q is None: hits = [r for r in rows if r['drop_effects']]
     else:
         ql = q.lower(); hits = [r for r in rows if str(r['id']) == q or ql in r['name'].lower()]
-    if not hits: sys.exit(f'no item matching {q!r} in the renewal dungeon data')
+    if not hits: sys.exit(f'no item matching {q!r} in the renewal data')
     for r in hits:
         print(f"{r['id']} {r['name']} [{r['type']}, slots {r['slots']}{', renewal-only' if r['renewal_only'] else ''}]")
         for ar in r['areas']:
@@ -164,7 +164,7 @@ def main():
     ap.add_argument('--item'); ap.add_argument('--effects', action='store_true')
     ap.add_argument('--area', action='append', choices=list(AREAS)); ap.add_argument('--out', default=f'{ROOT}/notes/handoff')
     a = ap.parse_args()
-    if a.item or a.effects: return lookup(Path(a.out) / 'renewal-dungeon-items.jsonl', a.item)
+    if a.item or a.effects: return lookup(Path(a.out) / 'renewal-items.jsonl', a.item)
     re_items, pre_items, re_mobs = items('re'), items('pre-re'), mobs('re')
     groups = box_groups()
     aegis_to_id = {d['AegisName']: i for i, d in re_mobs.items()}
@@ -195,10 +195,10 @@ def main():
         res['quests'] = [] if len(res['items']) > 300 else [dict(q, gives=[{'id': i, 'name': n, 'qty': c, 'renewal_only': i not in pre_ids} for i, n, c in q['gives']]) for q in quest_rewards(aegis)]
         result[area] = res
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    (out / 'renewal-dungeon-items.json').write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8')
+    (out / 'renewal-items.json').write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8')
     pct = lambda x: f'{x:g}%'
-    (out / 'renewal-dungeon-items.jsonl').write_text('\n'.join(json.dumps(r, ensure_ascii=False) for r in build_index(result)) + '\n', encoding='utf-8')
-    md = ['# Renewal dungeon drops (rAthena renewal, official iRO values)', '',
+    (out / 'renewal-items.jsonl').write_text('\n'.join(json.dumps(r, ensure_ascii=False) for r in build_index(result)) + '\n', encoding='utf-8')
+    md = ['# Renewal drops (rAthena renewal, official iRO values)', '',
           'Each drop shows the official 1x base rate, then the uaRO rate after the server multiplier: item drops x5 (cap 100%), MvP drops x3, normal cards x5, MvP/mini-boss cards x1.',
           'Assumption: non-card drops of mini-bosses and MvPs also take x5 (the wiki only states the card and MvP-slot rules). Chance-to-drop effects on cards and equipment (bAdd*DropItem) are shown the same way, x5. Box contents, instance rewards and quest rewards are not multiplied.', '']
     for area, res in result.items():
@@ -228,8 +228,8 @@ def main():
             md += ['', '### Quests with a hunt target in this area (rewards from NPC scripts, heuristic)', '']
             md += [f'- Quest {q["quest"]} {q["title"]}: ' + (', '.join(f'{g["name"]} ({g["id"]}) x{g["qty"] or 1}' for g in q['gives']) or 'no item reward found') for q in res['quests']]
         md.append('')
-    (out / 'renewal-dungeon-items.md').write_text('\n'.join(md), encoding='utf-8')
+    (out / 'renewal-items.md').write_text('\n'.join(md), encoding='utf-8')
     for area, res in result.items(): print(f'{area}: {len(res["mobs"])} mobs, {len(res["items"])} items')
-    print(f'wrote {out}/renewal-dungeon-items.{{json,md}}')
+    print(f'wrote {out}/renewal-items.{{json,md}}')
 
 if __name__ == '__main__': main()

@@ -1,7 +1,7 @@
-"""Tests for the uaRO rate rules in bin/renewal_dungeon_items.py."""
+"""Tests for the uaRO rate rules in bin/renewal_items.py."""
 import os, sys, unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin'))
-import renewal_dungeon_items as r
+import renewal_items as r
 
 class Rates(unittest.TestCase):
     def test_normal_drop_x5(self): self.assertEqual(r.uaro_rate(100, 'drop', False, False), (500, 'drop x5'))
