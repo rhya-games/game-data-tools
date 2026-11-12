@@ -4,6 +4,8 @@
 Areas: the renewal areas on the uaRO wiki's Areas and Instances table (episodes 12-14.2) plus the Niflheim dungeon (nif_dun).
 Mobs come from the rAthena renewal spawn scripts (maps) or instance scripts (monster/areamonster calls);
 drops from re/mob_db.yml; item data from re/item_db_*.yml. Values are official iRO values, not uaRO's.
+Each drop shows the official 1x rate and the uaRO rate (item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1).
+Also lists box contents, instance script rewards and quest rewards with a hunt target in the area.
 Writes <out>/renewal-dungeon-items.json and .md (default out: $GAME_DATA/notes/handoff).
 """
 import argparse, glob, json, re, sys
@@ -18,6 +20,8 @@ AREAS = {
     'Old Glast Heim': ('npc/re/instances/OldGlastHeim.txt', None, 'instance 1@gl_k / 2@gl_k'),
     'Scaraba Hole': ('npc/re/mobs/dungeons/dic_dun.txt', {'dic_dun01', 'dic_dun02'}, 'dic_dun01, dic_dun02'),
     'Scaraba Hole (Nightmare)': ('npc/re/mobs/dungeons/dic_dun.txt', {'dic_dun03'}, 'dic_dun03; not on the wiki page'),
+    'Dimensional Gorge': ('npc/re/mobs/fields/morocc.txt', {'moc_fild21', 'moc_fild22'}, 'ep 12; moc_fild21, moc_fild22'),
+    'Eclage Interior': ('npc/re/instances/EclageInterior.txt', None, 'ep 14.2; instance 1@ecl'),
     'Endless Tower': ('npc/instances/EndlessTower.txt', None, 'ep 12; instance 1@tower..6@tower'),
     'Sealed Shrine': ('npc/instances/SealedShrine.txt', None, 'ep 12; instance'),
     'Brasilis': ('npc/re/mobs/fields/brasilis.txt', None, 'ep 13.2; bra_fild01'),
@@ -59,21 +63,73 @@ def mob_ids(script, maps, aegis_to_id):
     ids.pop(None, None)
     return sorted(ids)
 
+
+def uaro_rate(rate, kind, is_card, boss):
+    """(uaRO rate in db units, rule). Item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1."""
+    if kind == 'mvp': return min(rate * 3, 10000), 'MvP drop x3'
+    if is_card and boss: return rate, 'boss card x1'
+    return min(rate * 5, 10000), 'card x5' if is_card else 'drop x5'
+
+def box_groups():
+    out = {}
+    for d in load(f'{RA}/db/re/item_group_db.yml'):
+        out[d['Group'].lower()] = d
+    return out
+
+def box_contents(item, groups, re_items):
+    m = re.search(r'get(?:rand)?groupitem\(IG_(\w+)', item.get('Script') or '', re.I)
+    g = groups.get(m.group(1).lower()) if m else None
+    if not g: return None
+    rows = []
+    for sg in g.get('SubGroups', []):
+        lst = sg.get('List', [])
+        total = sum(x.get('Rate', 0) for x in lst) or 1
+        for x in lst:
+            d = re_items.get(x['Item'])
+            pct = 100.0 if sg.get('Algorithm') == 'All' else x.get('Rate', 0) / total * 100
+            rows.append({'item': x['Item'], 'id': d['Id'] if d else None, 'name': d.get('Name', x['Item']) if d else x['Item'],
+                         'amount': x.get('Amount', 1), 'pct': round(pct, 3), 'subgroup': sg.get('SubGroup'), 'algorithm': sg.get('Algorithm', 'SharedPool')})
+    return rows
+
+def script_rewards(script, iid, re_items):
+    """Items given by getitem in an instance script: [(id, name, qty)]."""
+    out = {}
+    for m in re.finditer(r'\bgetitem\s+(\w+)\s*,\s*(\d+)', Path(f'{RA}/{script}').read_text(encoding='utf-8', errors='replace')):
+        v = m.group(1)
+        d = iid.get(int(v)) if v.isdigit() else re_items.get(v)
+        if d: out[d['Id']] = (d['Id'], d.get('Name', v), int(m.group(2)))
+    return sorted(out.values())
+
+def quest_rewards(mob_aegis):
+    """Quests (re db) with a hunt target in the area: [(quest id, title, [(item id, name, qty)])]."""
+    out = []
+    p = Path(f'{ROOT}/index/quests.jsonl')
+    if not p.is_file(): return out
+    for l in p.read_text(encoding='utf-8').splitlines():
+        q = json.loads(l)
+        if not any(t.get('mob') in mob_aegis for t in (q.get('db', {}).get('re', {}).get('targets') or [])): continue
+        gives = {(i['item'], i['item_name'], i.get('qty')) for i in q.get('items', []) if i['relation'] == 'gives'}
+        out.append({'quest': q['id'], 'title': q['title'], 'gives': sorted(gives, key=lambda g: g[0])})
+    return out
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--area', action='append', choices=list(AREAS)); ap.add_argument('--out', default=f'{ROOT}/notes/handoff')
     a = ap.parse_args()
     re_items, pre_items, re_mobs = items('re'), items('pre-re'), mobs('re')
+    groups = box_groups()
     aegis_to_id = {d['AegisName']: i for i, d in re_mobs.items()}
     iid = {d['Id']: d for d in re_items.values()}
     pre_ids = {d['Id'] for d in pre_items.values()}
     result = {}
     for area in a.area or AREAS:
         script, maps, note = AREAS[area]
-        res = {'note': note, 'source': script, 'mobs': [], 'items': {}}
+        res = {'note': note, 'source': script, 'mobs': [], 'items': {}, 'rewards': [], 'quests': []}
+        aegis = set()
         for mid in mob_ids(script, maps, aegis_to_id):
             m = re_mobs.get(mid)
             if not m: res['mobs'].append({'id': mid, 'name': '?', 'drops': []}); continue
+            aegis.add(m['AegisName']); boss = m.get('Class') == 'Boss' or bool(m.get('MvpExp'))
             drops = [(x['Item'], x['Rate'], 'drop') for x in m.get('Drops', [])] + [(x['Item'], x['Rate'], 'mvp') for x in m.get('MvpDrops', [])]
             res['mobs'].append({'id': mid, 'name': m.get('Name', m['AegisName']), 'drops': [{'item': i, 'rate': r, 'kind': k} for i, r, k in drops]})
             for i, r, k in drops:
@@ -82,23 +138,40 @@ def main():
                 e = res['items'].setdefault(i, {'id': d['Id'], 'name': d.get('Name', i), 'type': d.get('Type', 'Etc'), 'slots': d.get('Slots', 0),
                     'weight': d.get('Weight', 0) / 10, 'buy': d.get('Buy'), 'sell': d.get('Sell'), 'attack': d.get('Attack'), 'defense': d.get('Defense'),
                     'location': d.get('Locations'), 'jobs': d.get('Jobs'), 'level': d.get('EquipLevelMin'), 'script': d.get('Script'),
-                    'renewal_only': d['Id'] not in pre_ids, 'dropped_by': []})
-                e['dropped_by'].append({'mob': mid, 'name': m.get('Name'), 'rate_pct': r / 100, 'kind': k})
+                    'renewal_only': d['Id'] not in pre_ids, 'dropped_by': [], 'box': box_contents(d, groups, re_items)})
+                u, rule = uaro_rate(r, k, e['type'] == 'Card', boss)
+                e['dropped_by'].append({'mob': mid, 'name': m.get('Name'), 'rate_pct': r / 100, 'uaro_pct': u / 100, 'rule': rule, 'kind': k})
+        if script.startswith('npc/re/instances') or script.startswith('npc/instances'):
+            res['rewards'] = [{'id': i, 'name': n, 'qty': q, 'renewal_only': i not in pre_ids} for i, n, q in script_rewards(script, iid, re_items)]
+        res['quests'] = [] if len(res['items']) > 300 else [dict(q, gives=[{'id': i, 'name': n, 'qty': c, 'renewal_only': i not in pre_ids} for i, n, c in q['gives']]) for q in quest_rewards(aegis)]
         result[area] = res
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / 'renewal-dungeon-items.json').write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8')
+    pct = lambda x: f'{x:g}%'
     md = ['# Renewal dungeon drops (rAthena renewal, official iRO values)', '',
-          'Base drop rates; uaRO multiplies item drops x5 (cap 100%), MvP drops x3, cards x5 (MvP/mini-boss cards x1).', '']
+          'Each drop shows the official 1x base rate, then the uaRO rate after the server multiplier: item drops x5 (cap 100%), MvP drops x3, normal cards x5, MvP/mini-boss cards x1.',
+          'Assumption: non-card drops of mini-bosses and MvPs also take x5 (the wiki only states the card and MvP-slot rules). Box contents, instance rewards and quest rewards are not multiplied.', '']
     for area, res in result.items():
         its = res['items']; cards = [v for v in its.values() if v.get('type') == 'Card']
-        md += [f'## {area} ({res["note"]})', f'Source: `{res["source"]}`. {len(res["mobs"])} monsters, {len(its)} items, {len(cards)} cards, {sum(1 for v in its.values() if v.get("renewal_only"))} items absent from the pre-renewal item db.', '',
-               '| ID | Item | Type | Slots | Renewal-only | Dropped by (base %) |', '|---|---|---|---|---|---|']
+        md += [f'## {area} ({res["note"]})', f'Source: `{res["source"]}`. {len(res["mobs"])} monsters, {len(its)} items, {len(cards)} cards, {sum(1 for v in its.values() if v.get("renewal_only"))} items absent from the pre-renewal item db.', '']
         big = len(its) > 300  # Endless Tower reuses most of the old monsters: list only the renewal-only items, the json has all
-        if big: md.append('Large list: only items absent from the pre-renewal item db are shown here; the json has them all.'); md.append('')
+        if big: md += ['Large list: only items absent from the pre-renewal item db are shown here; the json has them all.', '']
+        md += ['| ID | Item | Type | Slots | Renewal-only | Dropped by: 1x official -> uaRO |', '|---|---|---|---|---|---|']
         for v in sorted(its.values(), key=lambda v: (v.get('type') != 'Card', v.get('id') or 0)):
             if big and not v.get('renewal_only'): continue
             if v.get('missing'): md.append(f'| ? | {v["name"]} | not in item db | | | |'); continue
-            md.append(f'| {v["id"]} | {v["name"]} | {v["type"]} | {v["slots"]} | {"yes" if v["renewal_only"] else ""} | ' + '; '.join(f'{d["name"]} {d["rate_pct"]:g}%' + (' (MVP)' if d['kind'] == 'mvp' else '') for d in v['dropped_by']) + ' |')
+            md.append(f'| {v["id"]} | {v["name"]} | {v["type"]} | {v["slots"]} | {"yes" if v["renewal_only"] else ""} | ' + '; '.join(f'{d["name"]} {pct(d["rate_pct"])} -> {pct(d["uaro_pct"])}' + (' (MVP)' if d['kind'] == 'mvp' else '') for d in v['dropped_by']) + ' |')
+        boxes = [v for v in its.values() if v.get('box') and (not big or v.get('renewal_only'))]
+        if boxes:
+            md += ['', '### Box contents (item group; percent is the chance within its sub-group)', '']
+            for v in boxes:
+                md.append(f'- **{v["name"]}** ({v["id"]}): ' + ', '.join(f'{c["name"]}{" x" + str(c["amount"]) if c["amount"] != 1 else ""} {pct(c["pct"])}' for c in v['box'] if c.get('id')))
+        if res['rewards']:
+            md += ['', '### Instance script rewards (getitem)', '']
+            md += [f'- {r["name"]} ({r["id"]}) x{r["qty"]}{" (renewal-only)" if r["renewal_only"] else ""}' for r in res['rewards']]
+        if res['quests']:
+            md += ['', '### Quests with a hunt target in this area (rewards from NPC scripts, heuristic)', '']
+            md += [f'- Quest {q["quest"]} {q["title"]}: ' + (', '.join(f'{g["name"]} ({g["id"]}) x{g["qty"] or 1}' for g in q['gives']) or 'no item reward found') for q in res['quests']]
         md.append('')
     (out / 'renewal-dungeon-items.md').write_text('\n'.join(md), encoding='utf-8')
     for area, res in result.items(): print(f'{area}: {len(res["mobs"])} mobs, {len(res["items"])} items')
