@@ -73,6 +73,27 @@ def mob_ids(script, maps, aegis_to_id):
     return sorted(ids)
 
 
+# Boxes the wiki and players ask about; always tracked with their full contents, whether or not a monster in the areas drops them
+TRACKED_BOXES = ['Gift_Box', 'Old_Blue_Box', 'Old_Violet_Box', 'Accessory_Box']  # Accessory_Box is the Jewelry Box
+
+def chest_items(script, iid, re_items):
+    """Treasure chests that makeitem their prizes: [(item id, qty, chance %)]. `if (rand(1,N) > T)` before a makeitem gives (N-T)/N."""
+    out = []; case = None
+    lines = Path(f'{RA}/{script}').read_text(encoding='utf-8', errors='replace').splitlines()
+    for i, line in enumerate(lines):
+        cm = re.match(r'\s*case\s+(\d+)\s*:', line)
+        if cm: case = int(cm.group(1))
+        m = re.search(r'\bmakeitem\s+(\w+)\s*,\s*(\d+)', line)
+        if not m: continue
+        v = m.group(1); d = iid.get(int(v)) if v.isdigit() else re_items.get(v)
+        if not d: continue
+        chance = 100.0
+        prev = lines[i - 1] if i else ''
+        c = re.search(r'rand\(1,\s*(\d+)\)\s*>\s*(\d+)', prev) if 'if' in prev and 'makeitem' not in prev else None
+        if c: chance = round((int(c.group(1)) - int(c.group(2))) / int(c.group(1)) * 100, 3)
+        out.append((d['Id'], int(m.group(2)), chance, case))
+    return out
+
 def merchant_items(files, iid, pre_ids):
     """Item ids on setarray/getitem/shop lines of exchange NPC scripts (heuristic: includes currencies and requirements)."""
     out = {}
@@ -241,7 +262,7 @@ def main():
     result = {}
     for area in a.area or AREAS:
         script, maps, note = AREAS[area]
-        res = {'note': note, 'source': script, 'mobs': [], 'items': {}, 'rewards': [], 'quests': [], 'merchant_items': []}
+        res = {'note': note, 'source': script, 'mobs': [], 'items': {}, 'rewards': [], 'quests': [], 'merchant_items': [], 'chests': []}
         aegis = set()
         for mid in mob_ids(script, maps, aegis_to_id):
             m = re_mobs.get(mid)
@@ -261,8 +282,16 @@ def main():
         if script.startswith('npc/re/instances') or script.startswith('npc/instances'):
             res['rewards'] = [{'id': i, 'name': n, 'qty': q, 'renewal_only': i not in pre_ids} for i, n, q in script_rewards(script, iid, re_items)]
         res['quests'] = [] if len(res['items']) > 300 else [dict(q, gives=[{'id': i, 'name': n, 'qty': c, 'renewal_only': i not in pre_ids} for i, n, c in q['gives']]) for q in quest_rewards(aegis)]
+        if script.startswith('npc/re/instances') or script.startswith('npc/instances'):
+            res['chests'] = [{'id': i, 'name': iid[i].get('Name'), 'qty': q, 'chance_pct': c, 'renewal_only': i not in pre_ids, 'chest': ch} for i, q, c, ch in chest_items(script, iid, re_items)]
         res['merchant_items'] = merchant_items(MERCHANTS.get(area, []), iid, pre_ids)
         result[area] = res
+    if not a.area:
+        box_area = {'note': 'always tracked; contents come from item_group_db', 'source': 'db/re/item_group_db.yml', 'mobs': [], 'items': {}, 'rewards': [], 'quests': [], 'merchant_items': [], 'chests': []}
+        for ae in TRACKED_BOXES:
+            d = re_items.get(ae)
+            if d: box_area['items'][ae] = {'id': d['Id'], 'name': d.get('Name', ae), 'type': d.get('Type', 'Etc'), 'slots': 0, 'weight': d.get('Weight', 0) / 10, 'buy': d.get('Buy'), 'sell': d.get('Sell'), 'attack': None, 'defense': None, 'location': None, 'jobs': None, 'level': None, 'script': d.get('Script'), 'aegis': ae, 'renewal_only': d['Id'] not in pre_ids, 'dropped_by': [], 'box': box_contents(d, groups, re_items), 'drop_effects': []}
+        result['Tracked boxes'] = box_area
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / 'renewal-items.json').write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8')
     pct = lambda x: f'{x:g}%'
@@ -285,11 +314,14 @@ def main():
             md += ['', '### Items that add a chance to drop something (official 1x -> uaRO x5, cap 100%)', '']
             for v in fx:
                 md.append(f'- **{v["name"]}** ({v["id"]}): ' + '; '.join(f'{e["drops"]}{" (item group)" if e["group"] else ""} from {e["from"]} {pct(e["official_pct"])} -> {pct(e["uaro_pct"])}' for e in v['drop_effects']))
-        boxes = [v for v in its.values() if v.get('box') and (not big or v.get('renewal_only'))]
+        boxes = [v for v in its.values() if v.get('box') and (not big or v.get('renewal_only') or area == 'Tracked boxes')]
         if boxes:
             md += ['', '### Box contents (item group; percent is the chance within its sub-group)', '']
             for v in boxes:
                 md.append(f'- **{v["name"]}** ({v["id"]}): ' + ', '.join(f'{c["name"]}{" x" + str(c["amount"]) if c["amount"] != 1 else ""} {pct(c["pct"])}' for c in v['box'] if c.get('id')))
+        if res.get('chests'):
+            md += ['', '### Treasure chest prizes (makeitem in the instance script; chance per chest)', '']
+            md += [f'- {c["name"]} ({c["id"]}) x{c["qty"]}: {pct(c["chance_pct"])}{" (chest " + str(c["chest"]) + ")" if c["chest"] else ""}{" (renewal-only)" if c["renewal_only"] else ""}' for c in res['chests']]
         if res['rewards']:
             md += ['', '### Instance script rewards (getitem)', '']
             md += [f'- {r["name"]} ({r["id"]}) x{r["qty"]}{" (renewal-only)" if r["renewal_only"] else ""}' for r in res['rewards']]
