@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Official (rAthena renewal) drops for renewal dungeons that uaRO added, with item data.
-  renewal_dungeon_items.py [--area NAME ...] [--out DIR]
+  renewal_dungeon_items.py [--area NAME ...] [--out DIR]     build the files
+  renewal_dungeon_items.py --item <id|name|text>             look an item up (drops with 1x and uaRO rates, areas, effects, box contents)
+  renewal_dungeon_items.py --effects                         list every item with a chance-to-drop effect
 Areas: the renewal areas on the uaRO wiki's Areas and Instances table (episodes 12-14.2) plus the Niflheim dungeon (nif_dun).
 Mobs come from the rAthena renewal spawn scripts (maps) or instance scripts (monster/areamonster calls);
 drops from re/mob_db.yml; item data from re/item_db_*.yml. Values are official iRO values, not uaRO's.
-Each drop shows the official 1x rate and the uaRO rate (item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1).
+Find one item with `renewal_dungeon_items.py --item <id|name>` (reads renewal-dungeon-items.jsonl, which has every item in every area, including all of Endless Tower).', '', 'Each drop shows the official 1x rate and the uaRO rate (item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1).
 Also lists box contents, instance script rewards and quest rewards with a hunt target in the area.
-Writes <out>/renewal-dungeon-items.json and .md (default out: $GAME_DATA/notes/handoff).
+Writes <out>/renewal-dungeon-items.json (by area, complete), .jsonl (one line per item, all areas merged; what --item reads) and .md (summary for people) (default out: $GAME_DATA/notes/handoff).
 """
 import argparse, glob, json, re, sys
 from pathlib import Path
@@ -133,10 +135,36 @@ def quest_rewards(mob_aegis):
         out.append({'quest': q['id'], 'title': q['title'], 'gives': sorted(gives, key=lambda g: g[0])})
     return out
 
+def lookup(path, q):
+    if not path.is_file(): sys.exit(f'error: {path} not found; run this script without --item first')
+    rows = [json.loads(l) for l in path.read_text(encoding='utf-8').splitlines()]
+    if q is None: hits = [r for r in rows if r['drop_effects']]
+    else:
+        ql = q.lower(); hits = [r for r in rows if str(r['id']) == q or ql in r['name'].lower()]
+    if not hits: sys.exit(f'no item matching {q!r} in the renewal dungeon data')
+    for r in hits:
+        print(f"{r['id']} {r['name']} [{r['type']}, slots {r['slots']}{', renewal-only' if r['renewal_only'] else ''}]")
+        for ar in r['areas']:
+            print(f"  {ar['area']}: " + '; '.join(f"{d['name']} {d['rate_pct']:g}% -> {d['uaro_pct']:g}% ({d['rule']})" for d in ar['dropped_by']))
+        for e in r['drop_effects']: print(f"  effect: drops {e['drops']} from {e['from']} {e['official_pct']:g}% -> {e['uaro_pct']:g}%")
+        if r['box']: print('  box: ' + ', '.join(f"{c['name']} {c['pct']:g}%" for c in r['box'] if c.get('id')))
+
+def build_index(result):
+    """One record per item with every area it drops in."""
+    idx = {}
+    for area, res in result.items():
+        for v in res['items'].values():
+            if v.get('missing'): continue
+            r = idx.setdefault(v['id'], {k: v[k] for k in ('id', 'name', 'type', 'slots', 'weight', 'buy', 'sell', 'attack', 'defense', 'location', 'jobs', 'level', 'script', 'renewal_only', 'box', 'drop_effects')} | {'areas': []})
+            r['areas'].append({'area': area, 'dropped_by': v['dropped_by']})
+    return sorted(idx.values(), key=lambda r: r['id'])
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--item'); ap.add_argument('--effects', action='store_true')
     ap.add_argument('--area', action='append', choices=list(AREAS)); ap.add_argument('--out', default=f'{ROOT}/notes/handoff')
     a = ap.parse_args()
+    if a.item or a.effects: return lookup(Path(a.out) / 'renewal-dungeon-items.jsonl', a.item)
     re_items, pre_items, re_mobs = items('re'), items('pre-re'), mobs('re')
     groups = box_groups()
     aegis_to_id = {d['AegisName']: i for i, d in re_mobs.items()}
@@ -169,6 +197,7 @@ def main():
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / 'renewal-dungeon-items.json').write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8')
     pct = lambda x: f'{x:g}%'
+    (out / 'renewal-dungeon-items.jsonl').write_text('\n'.join(json.dumps(r, ensure_ascii=False) for r in build_index(result)) + '\n', encoding='utf-8')
     md = ['# Renewal dungeon drops (rAthena renewal, official iRO values)', '',
           'Each drop shows the official 1x base rate, then the uaRO rate after the server multiplier: item drops x5 (cap 100%), MvP drops x3, normal cards x5, MvP/mini-boss cards x1.',
           'Assumption: non-card drops of mini-bosses and MvPs also take x5 (the wiki only states the card and MvP-slot rules). Chance-to-drop effects on cards and equipment (bAdd*DropItem) are shown the same way, x5. Box contents, instance rewards and quest rewards are not multiplied.', '']
@@ -176,7 +205,7 @@ def main():
         its = res['items']; cards = [v for v in its.values() if v.get('type') == 'Card']
         md += [f'## {area} ({res["note"]})', f'Source: `{res["source"]}`. {len(res["mobs"])} monsters, {len(its)} items, {len(cards)} cards, {sum(1 for v in its.values() if v.get("renewal_only"))} items absent from the pre-renewal item db.', '']
         big = len(its) > 300  # Endless Tower reuses most of the old monsters: list only the renewal-only items, the json has all
-        if big: md += ['Large list: only items absent from the pre-renewal item db are shown here; the json has them all.', '']
+        if big: md += ['Large list: only items absent from the pre-renewal item db are shown here. Use `--item` or the jsonl for the rest.', '']
         md += ['| ID | Item | Type | Slots | Renewal-only | Dropped by: 1x official -> uaRO |', '|---|---|---|---|---|---|']
         for v in sorted(its.values(), key=lambda v: (v.get('type') != 'Card', v.get('id') or 0)):
             if big and not v.get('renewal_only'): continue

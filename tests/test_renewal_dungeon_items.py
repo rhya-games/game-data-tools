@@ -19,3 +19,10 @@ class Effects(unittest.TestCase):
     def test_any_monster_and_cap(self):
         e = r.drop_effects('bonus2 bAddMonsterDropItem,501,3000;', {}, {})[0]
         self.assertEqual((e['official_pct'], e['uaro_pct'], e['from']), (30.0, 100.0, 'any monster'))
+
+class Index(unittest.TestCase):
+    def test_merges_areas(self):
+        it = lambda: {'id': 1, 'name': 'A', 'type': 'Card', 'slots': 0, 'weight': 1, 'buy': None, 'sell': None, 'attack': None, 'defense': None, 'location': None,
+                      'jobs': None, 'level': None, 'script': '', 'renewal_only': True, 'box': None, 'drop_effects': [], 'dropped_by': []}
+        idx = r.build_index({'X': {'items': {'a': it()}}, 'Y': {'items': {'a': it()}}})
+        self.assertEqual([a['area'] for a in idx[0]['areas']], ['X', 'Y'])
