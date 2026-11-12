@@ -23,6 +23,7 @@ Nothing here contains game data. The databases are cloned and the pages are save
 | `bin/fetch_mob_sprites.py` | Download missing monster pictures (animated GIF) from RateMyServer, then Divine Pride, for ids you give, the monsters a wiki mentions (`--wiki`) or the Endless Tower spawns (`--endless-tower`) |
 | `bin/fetch_npc_sprites.py <NAME ...>` | Download NPC sprite thumbnails by sprite name (for example `4_F_SISTER`, names in `index/sprites.jsonl`) from the ai4rei npclist to `images/npcs/<NAME>.gif` |
 | `bin/fetch_rms_quests.py <ids>` | Find the RateMyServer quest page that makes (or uses) each item, from the item's RateMyServer page; writes `index/rms-quests.json` (official iRO quests only) |
+| `bin/fetch_rms_npcs.py` | Read each of those quest pages for the NPC and map coordinates; writes `index/rms-quest-npcs.json` ({item id: npc, map, x, y, `/navi` text}); official iRO values |
 | `bin/sprite_clean.py` | Clean viewlist sprites and item icons: restore the white the source stored as transparent, per-sprite exceptions in `data/sprite-fixes.json`; `--grid ID` shows a sprite with pixel coordinates, `--sheet IDS` a before/after sheet |
 | `bin/repo_changes.py` | Report what changed in uaro-docs, uaro-loot-sheet and this repo since the last baseline, the follow-ups each change implies, and ids with no picture (`--ack` moves the baseline) |
 | `bin/backup_collection.py` | Back up `images/` and `notes/` into a verified, timestamped archive (keeps the newest 10; `--also` copies elsewhere) |
