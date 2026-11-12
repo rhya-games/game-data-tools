@@ -6938,6 +6938,7 @@
    "rewards": {
     "items": [
      {
+      "item_id": 5361,
       "item": "Gangster Scarf",
       "qty": 1
      }
@@ -9082,6 +9083,7 @@
      "qty": 1
     },
     {
+     "item_id": 4175,
      "item": "Poisonous Toad Card",
      "qty": 1
     }
