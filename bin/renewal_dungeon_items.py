@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Official (rAthena renewal) drops for renewal dungeons that uaRO added, with item data.
   renewal_dungeon_items.py [--area NAME ...] [--out DIR]
-Areas: Horror Toy Factory, Old Glast Heim, Scaraba Hole, Niflheim Dungeon (nif_dun).
+Areas: the renewal areas on the uaRO wiki's Areas and Instances table (episodes 12-14.2) plus the Niflheim dungeon (nif_dun).
 Mobs come from the rAthena renewal spawn scripts (maps) or instance scripts (monster/areamonster calls);
 drops from re/mob_db.yml; item data from re/item_db_*.yml. Values are official iRO values, not uaRO's.
 Writes <out>/renewal-dungeon-items.json and .md (default out: $GAME_DATA/notes/handoff).
@@ -18,6 +18,17 @@ AREAS = {
     'Old Glast Heim': ('npc/re/instances/OldGlastHeim.txt', None, 'instance 1@gl_k / 2@gl_k'),
     'Scaraba Hole': ('npc/re/mobs/dungeons/dic_dun.txt', {'dic_dun01', 'dic_dun02'}, 'dic_dun01, dic_dun02'),
     'Scaraba Hole (Nightmare)': ('npc/re/mobs/dungeons/dic_dun.txt', {'dic_dun03'}, 'dic_dun03; not on the wiki page'),
+    'Endless Tower': ('npc/instances/EndlessTower.txt', None, 'ep 12; instance 1@tower..6@tower'),
+    'Sealed Shrine': ('npc/instances/SealedShrine.txt', None, 'ep 12; instance'),
+    'Brasilis': ('npc/re/mobs/fields/brasilis.txt', None, 'ep 13.2; bra_fild01'),
+    'Brasilis Dungeon': ('npc/re/mobs/dungeons/bra_dun.txt', None, 'ep 13.2; bra_dun01, bra_dun02'),
+    'Manuk': ('npc/re/mobs/fields/manuk.txt', None, 'ep 13.2; man_fild01-03'),
+    'Splendide': ('npc/re/mobs/fields/splendide.txt', None, 'ep 13.2; spl_fild01-03'),
+    "Nidhogg's Dungeon": ('npc/re/mobs/dungeons/nyd_dun.txt', None, 'ep 13.2; nyd_dun01'),
+    "Nidhoggur's Nest": ('npc/instances/NydhoggsNest.txt', None, 'ep 13.2; instance'),
+    'El Dicastes Fields': ('npc/re/mobs/fields/dicastes.txt', None, 'ep 13.3; dic_fild01, dic_fild02'),
+    'Biolabs 4': ('npc/re/mobs/dungeons/lhz_dun.txt', {'lhz_dun04'}, 'ep 14.1; lhz_dun04'),
+    'Byalan Dungeon 6': ('npc/re/mobs/dungeons/iz_dun.txt', {'iz_dun05'}, 'ep 14.1; iz_dun05'),
     'Niflheim Dungeon': ('npc/re/mobs/dungeons/nif_dun.txt', None, 'nif_dun01, nif_dun02'),
 }
 
@@ -82,7 +93,10 @@ def main():
         its = res['items']; cards = [v for v in its.values() if v.get('type') == 'Card']
         md += [f'## {area} ({res["note"]})', f'Source: `{res["source"]}`. {len(res["mobs"])} monsters, {len(its)} items, {len(cards)} cards, {sum(1 for v in its.values() if v.get("renewal_only"))} items absent from the pre-renewal item db.', '',
                '| ID | Item | Type | Slots | Renewal-only | Dropped by (base %) |', '|---|---|---|---|---|---|']
+        big = len(its) > 300  # Endless Tower reuses most of the old monsters: list only the renewal-only items, the json has all
+        if big: md.append('Large list: only items absent from the pre-renewal item db are shown here; the json has them all.'); md.append('')
         for v in sorted(its.values(), key=lambda v: (v.get('type') != 'Card', v.get('id') or 0)):
+            if big and not v.get('renewal_only'): continue
             if v.get('missing'): md.append(f'| ? | {v["name"]} | not in item db | | | |'); continue
             md.append(f'| {v["id"]} | {v["name"]} | {v["type"]} | {v["slots"]} | {"yes" if v["renewal_only"] else ""} | ' + '; '.join(f'{d["name"]} {d["rate_pct"]:g}%' + (' (MVP)' if d['kind'] == 'mvp' else '') for d in v['dropped_by']) + ' |')
         md.append('')
