@@ -63,6 +63,13 @@ def by_item(key):
             for i, n, r, tag in sorted(rows, key=lambda x: -x[2]): print(f'   {i:>5} {n:28} {pct(r):>8} {tag}')
             if not rows: print('   no monster drops it')
 
+def renewal_areas(key):
+    """Add the uaRO rates and chance-to-drop effects from the renewal areas index (bin/renewal_items.py), when it has been built."""
+    import renewal_items
+    recs = renewal_items.find_records(key)
+    if recs: print('\n== renewal areas on uaRO (1x official -> uaRO rate)'); renewal_items.stale_note() and print(renewal_items.stale_note())
+    for r in recs: print('\n'.join(renewal_items.record_lines(r)))
+
 def by_mob(key):
     for label, items_fn, mobs_fn, mode in SOURCES:
         items = items_fn(mode)
@@ -75,4 +82,5 @@ def by_mob(key):
 
 if __name__ == '__main__':
     a = sys.argv[1:]
-    by_mob(a[1]) if a[:1] == ['--mob'] else by_item(a[0])
+    if a[:1] == ['--mob']: by_mob(a[1])
+    else: by_item(a[0]); renewal_areas(a[0])
