@@ -46,3 +46,14 @@ class Lookup(unittest.TestCase):
                'drop_effects': [{'drops': 'Fish (1)', 'from': 'Fish monsters', 'official_pct': 1.0, 'uaro_pct': 5.0}]}
         text = '\n'.join(r.record_lines(rec))
         self.assertIn('0.01% -> 0.05%', text); self.assertIn('1% -> 5%', text)
+
+class Chests(unittest.TestCase):
+    def test_chest_chance_from_rand_condition(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(f'{d}/s'); open(f'{d}/s/i.txt', 'w').write(
+                'case 1:\n\tmakeitem 7642,1, map, 1, 1;\n\tif (rand(1,1000) > 150)\n\t\tmakeitem 644,1, map,1,1;// Gift_Box\n\tbreak;\n')
+            old, r.RA = r.RA, d
+            try: out = r.chest_items('s/i.txt', {7642: {'Id': 7642}, 644: {'Id': 644}}, {})
+            finally: r.RA = old
+        self.assertEqual(out, [(7642, 1, 100.0, 1), (644, 1, 85.0, 1)])

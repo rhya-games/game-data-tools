@@ -125,7 +125,8 @@ def descriptions():
 
 def uaro_rate(rate, kind, is_card, boss, mvp=False):
     """(uaRO rate in db units, rule). Item drops x5 capped at 100%, MvP drops x3, cards x5, MvP/mini-boss cards x1.
-    Normal (non-card) drops of an MvP monster are x3 too: the Scaraba Queen's drops on the wiki are 3x the official rates."""
+    Normal (non-card) drops of an MvP monster are x3 too: the Scaraba Queen's drops on the wiki are 3x the official rates.
+    Non-card drops of mini-bosses are x5 (confirmed by the maintainer)."""
     if kind == 'mvp': return min(rate * 3, 10000), 'MvP drop x3'
     if is_card and boss: return rate, 'boss card x1'
     if mvp and not is_card: return min(rate * 3, 10000), 'MvP monster drop x3'
@@ -298,7 +299,7 @@ def main():
     (out / 'renewal-items.jsonl').write_text('\n'.join(json.dumps(r, ensure_ascii=False) for r in build_index(result, combo_db, desc, re_items)) + '\n', encoding='utf-8')
     md = ['# Renewal drops (rAthena renewal, official iRO values)', '',
           'Each drop shows the official 1x base rate, then the uaRO rate after the server multiplier: item drops x5 (cap 100%), MvP drops x3, normal cards x5, MvP/mini-boss cards x1.',
-          'Non-card drops of an MvP monster are x3 (confirmed on the Queen Scaraba table on the wiki, 3x the official rates). Non-card drops of mini-bosses are assumed x5 and are unconfirmed. Chance-to-drop effects on cards and equipment (bAdd*DropItem) are shown the same way, x5. Box contents, instance rewards and quest rewards are not multiplied.', '']
+          'Non-card drops of an MvP monster are x3 (confirmed on the Queen Scaraba table on the wiki, 3x the official rates). Non-card drops of mini-bosses are x5 (confirmed). Where the wiki shows a different rate for a specific item (for example the Queen's Wing at 35%), uaRO changed that drop; these figures stay as computed unless the wiki or a patch note shows otherwise. Chance-to-drop effects on cards and equipment (bAdd*DropItem) are shown the same way, x5. Box contents, instance rewards and quest rewards are not multiplied.', '']
     for area, res in result.items():
         its = res['items']; cards = [v for v in its.values() if v.get('type') == 'Card']
         md += [f'## {area} ({res["note"]})', f'Source: `{res["source"]}`. {len(res["mobs"])} monsters, {len(its)} items, {len(cards)} cards, {sum(1 for v in its.values() if v.get("renewal_only"))} items absent from the pre-renewal item db.', '']
