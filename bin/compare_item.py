@@ -127,5 +127,8 @@ if __name__ == '__main__':
     if not note: print(f'\nproject docs / patch notes ({len(hits)} lines mention it):')
     for b, n, l in hits[:25]: print(f'  {b}:{n}: {l}')
     if len(hits) > 25: print(f'  ... {len(hits) - 25} more')
+    import renewal_items  # uaRO rates and chance-to-drop effects, when bin/renewal_items.py has been run
+    recs = renewal_items.find_records(iid or key)
+    if recs: print('\n== renewal areas on uaRO (1x official -> uaRO rate)'); renewal_items.stale_note() and print(renewal_items.stale_note()); [print('\n'.join(renewal_items.record_lines(r))) for r in recs]
     p = common.precedence_note()
     if p: print('\n' + p)
