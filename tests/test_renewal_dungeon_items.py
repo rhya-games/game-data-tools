@@ -11,3 +11,11 @@ class Rates(unittest.TestCase):
     def test_mvp_slot_x3(self): self.assertEqual(r.uaro_rate(1000, 'mvp', False, True), (3000, 'MvP drop x3'))
 
 if __name__ == '__main__': unittest.main()
+
+class Effects(unittest.TestCase):
+    def test_race_drop_x5(self):
+        e = r.drop_effects('bonus3 bAddMonsterDropItem,12031,RC_Fish,100;', {}, {})[0]
+        self.assertEqual((e['official_pct'], e['uaro_pct'], e['from']), (1.0, 5.0, 'Fish monsters'))
+    def test_any_monster_and_cap(self):
+        e = r.drop_effects('bonus2 bAddMonsterDropItem,501,3000;', {}, {})[0]
+        self.assertEqual((e['official_pct'], e['uaro_pct'], e['from']), (30.0, 100.0, 'any monster'))

@@ -70,6 +70,27 @@ def uaro_rate(rate, kind, is_card, boss):
     if is_card and boss: return rate, 'boss card x1'
     return min(rate * 5, 10000), 'card x5' if is_card else 'drop x5'
 
+DROP_EFFECT = re.compile(r'bonus([23])\s+bAdd(MonsterId|Monster|Class)DropItem(Group)?\s*,([^;]*);', re.I)
+
+def drop_effects(script, iid, re_items):
+    """'Chance to drop X' bonuses in an item script. n is in 1/100 %: official pct = n/100; uaRO is x5, capped at 100%."""
+    out = []
+    for m in DROP_EFFECT.finditer(script or ''):
+        args = [a.strip() for a in m.group(4).split(',')]
+        try:
+            if m.group(1) == '2': what, who, n = args[0], 'any monster', int(args[1])
+            else: what, who, n = args[0], args[1], int(args[2])
+        except (IndexError, ValueError): continue
+        group = bool(m.group(3))
+        if not group:
+            d = iid.get(int(what)) if what.isdigit() else re_items.get(what)
+            what = f"{d.get('Name', what)} ({d['Id']})" if d else what
+        if m.group(2).lower() == 'monsterid': who = f'monster id {who}'
+        elif m.group(2).lower() == 'class': who = f'class {who}'
+        elif who != 'any monster': who = who.replace('RC_', '') + ' monsters'
+        out.append({'drops': what, 'group': group, 'from': who, 'official_pct': n / 100, 'uaro_pct': min(n * 5, 10000) / 100})
+    return out
+
 def box_groups():
     out = {}
     for d in load(f'{RA}/db/re/item_group_db.yml'):
@@ -138,7 +159,7 @@ def main():
                 e = res['items'].setdefault(i, {'id': d['Id'], 'name': d.get('Name', i), 'type': d.get('Type', 'Etc'), 'slots': d.get('Slots', 0),
                     'weight': d.get('Weight', 0) / 10, 'buy': d.get('Buy'), 'sell': d.get('Sell'), 'attack': d.get('Attack'), 'defense': d.get('Defense'),
                     'location': d.get('Locations'), 'jobs': d.get('Jobs'), 'level': d.get('EquipLevelMin'), 'script': d.get('Script'),
-                    'renewal_only': d['Id'] not in pre_ids, 'dropped_by': [], 'box': box_contents(d, groups, re_items)})
+                    'renewal_only': d['Id'] not in pre_ids, 'dropped_by': [], 'box': box_contents(d, groups, re_items), 'drop_effects': drop_effects(d.get('Script'), iid, re_items)})
                 u, rule = uaro_rate(r, k, e['type'] == 'Card', boss)
                 e['dropped_by'].append({'mob': mid, 'name': m.get('Name'), 'rate_pct': r / 100, 'uaro_pct': u / 100, 'rule': rule, 'kind': k})
         if script.startswith('npc/re/instances') or script.startswith('npc/instances'):
@@ -150,7 +171,7 @@ def main():
     pct = lambda x: f'{x:g}%'
     md = ['# Renewal dungeon drops (rAthena renewal, official iRO values)', '',
           'Each drop shows the official 1x base rate, then the uaRO rate after the server multiplier: item drops x5 (cap 100%), MvP drops x3, normal cards x5, MvP/mini-boss cards x1.',
-          'Assumption: non-card drops of mini-bosses and MvPs also take x5 (the wiki only states the card and MvP-slot rules). Box contents, instance rewards and quest rewards are not multiplied.', '']
+          'Assumption: non-card drops of mini-bosses and MvPs also take x5 (the wiki only states the card and MvP-slot rules). Chance-to-drop effects on cards and equipment (bAdd*DropItem) are shown the same way, x5. Box contents, instance rewards and quest rewards are not multiplied.', '']
     for area, res in result.items():
         its = res['items']; cards = [v for v in its.values() if v.get('type') == 'Card']
         md += [f'## {area} ({res["note"]})', f'Source: `{res["source"]}`. {len(res["mobs"])} monsters, {len(its)} items, {len(cards)} cards, {sum(1 for v in its.values() if v.get("renewal_only"))} items absent from the pre-renewal item db.', '']
@@ -161,6 +182,11 @@ def main():
             if big and not v.get('renewal_only'): continue
             if v.get('missing'): md.append(f'| ? | {v["name"]} | not in item db | | | |'); continue
             md.append(f'| {v["id"]} | {v["name"]} | {v["type"]} | {v["slots"]} | {"yes" if v["renewal_only"] else ""} | ' + '; '.join(f'{d["name"]} {pct(d["rate_pct"])} -> {pct(d["uaro_pct"])}' + (' (MVP)' if d['kind'] == 'mvp' else '') for d in v['dropped_by']) + ' |')
+        fx = [v for v in its.values() if v.get('drop_effects') and (not big or v.get('renewal_only'))]
+        if fx:
+            md += ['', '### Items that add a chance to drop something (official 1x -> uaRO x5, cap 100%)', '']
+            for v in fx:
+                md.append(f'- **{v["name"]}** ({v["id"]}): ' + '; '.join(f'{e["drops"]}{" (item group)" if e["group"] else ""} from {e["from"]} {pct(e["official_pct"])} -> {pct(e["uaro_pct"])}' for e in v['drop_effects']))
         boxes = [v for v in its.values() if v.get('box') and (not big or v.get('renewal_only'))]
         if boxes:
             md += ['', '### Box contents (item group; percent is the chance within its sub-group)', '']
