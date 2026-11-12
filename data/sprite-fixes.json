@@ -1,0 +1,274 @@
+{
+ "about": "Exceptions for bin/sprite_clean.py, keyed by sprite id (the viewlist id, or the item icon file name without .gif). See that script's docstring for the keys.",
+ "sprites": {
+  "138": {
+   "holes": true,
+   "note": "Hat of the Sun God: ring around the medallion is open"
+  },
+  "110": {
+   "holes": true,
+   "note": "Helm of Angel: eye sockets are open"
+  },
+  "381": {
+   "holes": true,
+   "note": "Large Orc Hero Helm: gaps between strands are open"
+  },
+  "379": {
+   "holes": true,
+   "note": "Dark Randgris Helm: single-pixel gaps on the wing tips are open"
+  },
+  "586": {
+   "holes": true,
+   "note": "Darkness Helm: same wing-tip gaps"
+  },
+  "164": {
+   "holes": true,
+   "note": "Crown of Ancient Queen: gaps on the side pieces are open"
+  },
+  "165": {
+   "holes": true,
+   "note": "Crown of Mistress: the keyhole in the middle is open"
+  },
+  "378": {
+   "white": true,
+   "note": "Koneko Hat: white cat, every gap white"
+  },
+  "418": {
+   "min_fill": 60,
+   "pixels": [
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     9
+    ],
+    [
+     5,
+     10
+    ],
+    [
+     5,
+     12
+    ],
+    [
+     5,
+     13
+    ],
+    [
+     5,
+     14
+    ],
+    [
+     5,
+     15
+    ],
+    [
+     6,
+     10
+    ],
+    [
+     7,
+     10
+    ],
+    [
+     7,
+     11
+    ],
+    [
+     8,
+     10
+    ],
+    [
+     9,
+     10
+    ],
+    [
+     9,
+     11
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     11
+    ],
+    [
+     11,
+     11
+    ],
+    [
+     12,
+     12
+    ],
+    [
+     15,
+     11
+    ],
+    [
+     16,
+     10
+    ],
+    [
+     16,
+     11
+    ],
+    [
+     17,
+     10
+    ],
+    [
+     18,
+     9
+    ],
+    [
+     18,
+     10
+    ],
+    [
+     19,
+     7
+    ]
+   ],
+   "note": "Beer Hat: foam (68 px) is white; the eye whites, the strip inside the mug and single gap pixels are painted white; the 2x4 hole in the handle stays open"
+  },
+  "200": {
+   "strip": true,
+   "note": "Zealotus Mask: light-grey outline drawn for pale backdrops"
+  },
+  "158": {
+   "note": "Angel Wing Ears: outline art whose white interior leaks to the outside; painted by hand",
+   "flood": [
+    {
+     "seed": [
+      9,
+      2
+     ],
+     "box": [
+      8,
+      1,
+      12,
+      4
+     ]
+    },
+    {
+     "seed": [
+      40,
+      2
+     ],
+     "box": [
+      37,
+      1,
+      41,
+      4
+     ]
+    }
+   ],
+   "pixels": [
+    [
+     1,
+     3
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     44,
+     3
+    ],
+    [
+     45,
+     3
+    ],
+    [
+     46,
+     3
+    ],
+    [
+     47,
+     3
+    ],
+    [
+     48,
+     3
+    ],
+    [
+     6,
+     2
+    ],
+    [
+     7,
+     2
+    ],
+    [
+     6,
+     3
+    ],
+    [
+     11,
+     5
+    ],
+    [
+     12,
+     5
+    ],
+    [
+     13,
+     5
+    ],
+    [
+     13,
+     6
+    ],
+    [
+     42,
+     2
+    ],
+    [
+     43,
+     2
+    ],
+    [
+     43,
+     3
+    ],
+    [
+     36,
+     5
+    ],
+    [
+     37,
+     5
+    ],
+    [
+     38,
+     5
+    ],
+    [
+     36,
+     6
+    ]
+   ]
+  },
+  "item5049": {
+   "holes": true,
+   "note": "Striped Hairband icon: the opening between the rim and the band is open (a 9 px slit)"
+  }
+ }
+}
